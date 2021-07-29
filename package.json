@@ -1,0 +1,27 @@
+{
+  "name": "back-end",
+  "version": "1.0.0",
+  "description": "Back-end for NoloNoloPlus",
+  "main": "index.js",
+  "scripts": {
+    "test": "nodemon index.js",
+    "doc": "jsdoc -t node_modules/jsdoc-sphinx/template -c Jsdoc.json -r ./src -d docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TechWebUnibo/back-end.git"
+  },
+  "author": "Antonio Lopez, Gledis Gila, Davide Cristoni",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/TechWebUnibo/back-end/issues"
+  },
+  "homepage": "https://github.com/TechWebUnibo/back-end#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jsdoc": "^3.6.7",
+    "jsdoc-sphinx": "0.0.6",
+    "mongoose": "^5.13.4",
+    "nodemon": "^2.0.12"
+  }
+}
