@@ -1,26 +1,26 @@
 /**
-* @file Customer schema
-* @author Antonio Lopez, Davide Cristoni, Gledis Gila
-*/
+ * @file Customer schema
+ * @author Antonio Lopez, Davide Cristoni, Gledis Gila
+ */
 
-const mongoose = require('mongoose');
+const mongoose = require('mongoose')
 
 const customerSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     username: {
         type: String,
-        required: true
-        },
+        required: true,
+    },
     password: {
         type: String,
-        required: true
+        required: true,
     },
     address: {
         city: String,
         zip: Number,
-        residence: String
+        residence: String,
     },
-    avatar: String
-});
+    avatar: String,
+})
 
-module.exports = mongoose.model('Customer', customerSchema);
+module.exports = mongoose.model('Customer', customerSchema)

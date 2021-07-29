@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nodemon index.js",
+    "prettier-check": "npx prettier --check ./src",
     "doc": "jsdoc -c jsdoc.json"
   },
   "repository": {
@@ -22,5 +23,14 @@
     "jsdoc": "^3.6.7",
     "mongoose": "^5.13.4",
     "nodemon": "^2.0.12"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  },
+  "prettier": {
+    "trailingComma": "es5",
+    "tabWidth": 4,
+    "semi": false,
+    "singleQuote": true
   }
 }
