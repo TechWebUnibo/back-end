@@ -21,7 +21,7 @@ jobs:
           name: Deploy
           command: | 
             ssh-keyscan -H ines.cs.unibo.it >> ~/.ssh/known_hosts
-            scp src/scripts/* antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
+            scp -r src/scripts/api/ antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
             scp src/index.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
 
 
