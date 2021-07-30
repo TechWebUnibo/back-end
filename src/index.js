@@ -10,34 +10,29 @@ const customers = require('./scripts/api/customers')
 const staff = require('./scripts/api/staff')
 
 // Constants
-const uri = 'mongodb://localhost:27017'
+const mongoCredentials = {
+    user: 'site202118',
+    pwd: 'om7Dieru',
+    site: 'mongo_site202118',
+}
+
+const uri =
+    'mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/NoloNoloPlus?writeConcern=majority'
 const port = 8000
 const db = mongoose.connection
 
 app = express()
 app.use(express.json())
 
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+// Set APIs route
+app.use('/api/customers/', customers)
+app.use('/api/staff/', staff)
 
+// Connect the database
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
     console.log('Connected to Mongo!')
-})
-
-app.post('/api/customers/', (req, res) => {
-    customers.addCustomer(req.body, res)
-})
-
-app.get('/api/customers/', (req, res) => {
-    customers.getCustomers(res)
-})
-
-app.post('/api/staff/', (req, res) => {
-    staff.addEmployee(req.body, res)
-})
-
-app.get('/api/staff/', (req, res) => {
-    staff.getEmployees(res)
 })
 
 app.listen(port, () => {
