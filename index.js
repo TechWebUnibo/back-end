@@ -16,8 +16,7 @@ const mongoCredentials = {
     site: 'mongo_site202118',
 }
 
-const uri =
-    `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/NoloNoloPlus?writeConcern=majority`
+const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/NoloNoloPlus?writeConcern=majority`
 const port = 8000
 const db = mongoose.connection
 
@@ -29,8 +28,8 @@ app.use('/api/customers/', customers)
 app.use('/api/staff/', staff)
 
 // Connect the database
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-db.on('error', console.error.bind(console, 'connection error:'));
+mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
     console.log('Connected to Mongo!')
 })

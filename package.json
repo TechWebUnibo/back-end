@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "nodemon index.js",
-    "prettier-check": "npx prettier --check ./src",
+    "prettier-check": "npx prettier --check index.js ./scripts",
     "doc": "jsdoc -c jsdoc.json"
   },
   "repository": {
