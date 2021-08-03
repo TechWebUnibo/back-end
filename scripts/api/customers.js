@@ -12,12 +12,13 @@ const path = require('path')
 
 var router = express.Router()
 
-const avatarPath = 'public/media/avatar'
+const avatarPath = 'img/avatar'
+const avatarFullPath = path.join(global.rootDir, 'public/media/', avatar)
 
 // Initialize local storage
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'public/media/avatar')
+        cb(null, avatarFullPath)
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
@@ -33,7 +34,7 @@ const upload = multer({ storage: storage })
 router.post('/', upload.single('avatar'), (req, res) => {
     let data = req.body
     data._id = new mongoose.Types.ObjectId()
-    data.avatar = req.file ? path.join('img/avatar', req.file.filename) : ''
+    data.avatar = req.file ? path.join(avatarPath, req.file.filename) : ''
     const newCustomer = new Customer(data)
     newCustomer
         .save()
@@ -76,7 +77,7 @@ router.delete('/:id', (req, res) => {
             if (result.avatar) {
                 try {
                     fs.unlinkSync(
-                        path.join(avatarPath, path.basename(result.avatar))
+                        path.join(avatarFullPath, path.basename(result.avatar))
                     )
                 } catch (err) {
                     console.log('Error while removing avatar')

@@ -3,6 +3,8 @@
  * @author Antonio Lopez, Davide Cristoni, Gledis Gila
  */
 
+global.rootDir = __dirname
+
 // Imports
 const express = require('express')
 const mongoose = require('mongoose')
@@ -28,7 +30,7 @@ app.use('/js', express.static(global.rootDir + '/public/js'))
 app.use('/css', express.static(global.rootDir + '/public/css'))
 app.use('/data', express.static(global.rootDir + '/public/data'))
 app.use('/docs', express.static(global.rootDir + '/public/html'))
-app.use('/img', express.static(global.rootDir + '/public/media'))
+app.use('/img', express.static(global.rootDir + '/public/media/img'))
 
 // Set APIs route
 app.use('/api/customers/', customers)
