@@ -23,12 +23,12 @@ const db = mongoose.connection
 app = express()
 app.use(express.json())
 
-// Define static paths  
-app.use('/js', express.static(global.rootDir + '/public/js'));
-app.use('/css', express.static(global.rootDir + '/public/css'));
-app.use('/data', express.static(global.rootDir + '/public/data'));
-app.use('/docs', express.static(global.rootDir + '/public/html'));
-app.use('/img', express.static(global.rootDir + '/public/media'));
+// Define static paths
+app.use('/js', express.static(global.rootDir + '/public/js'))
+app.use('/css', express.static(global.rootDir + '/public/css'))
+app.use('/data', express.static(global.rootDir + '/public/data'))
+app.use('/docs', express.static(global.rootDir + '/public/html'))
+app.use('/img', express.static(global.rootDir + '/public/media'))
 
 // Set APIs route
 app.use('/api/customers/', customers)
