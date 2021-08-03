@@ -13,7 +13,7 @@ const path = require('path')
 var router = express.Router()
 
 const avatarPath = 'img/avatar'
-const avatarFullPath = path.join(global.rootDir, 'public/media/', avatar)
+const avatarFullPath = path.join(global.rootDir, 'public/media/', avatarPath)
 
 // Initialize local storage
 var storage = multer.diskStorage({
