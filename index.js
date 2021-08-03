@@ -16,12 +16,19 @@ const mongoCredentials = {
     site: 'mongo_site202118',
 }
 
-const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}/NoloNoloPlus?writeConcern=majority`
+const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority`
 const port = 8000
 const db = mongoose.connection
 
 app = express()
 app.use(express.json())
+
+// Define static paths  
+app.use('/js', express.static(global.rootDir + '/public/js'));
+app.use('/css', express.static(global.rootDir + '/public/css'));
+app.use('/data', express.static(global.rootDir + '/public/data'));
+app.use('/docs', express.static(global.rootDir + '/public/html'));
+app.use('/img', express.static(global.rootDir + '/public/media'));
 
 // Set APIs route
 app.use('/api/customers/', customers)

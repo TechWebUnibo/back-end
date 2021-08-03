@@ -5,23 +5,41 @@
  */
 const express = require('express')
 const mongoose = require('mongoose')
+const fs = require('fs')
 const Customer = require('./models/customer')
+const multer = require('multer')
+const path = require('path')
 
 var router = express.Router()
+
+const avatarPath = 'public/media/avatar'
+
+// Initialize local storage
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/media/avatar')
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
+    },
+})
+
+const upload = multer({ storage: storage })
 
 /**
  * Add a new customer.
  * @param {object} data Data of the new customer
  */
-router.post('/', (req, res) => {
+router.post('/', upload.single('avatar'), (req, res) => {
     let data = req.body
     data._id = new mongoose.Types.ObjectId()
+    data.avatar = req.file ? path.join('img/avatar', req.file.filename) : ''
     const newCustomer = new Customer(data)
     newCustomer
         .save()
         .then((result) => {
             res.status(200).json({
-                message: 'Customer created  ',
+                message: 'Customer created',
                 customer: newCustomer,
             })
         })
@@ -52,14 +70,18 @@ router.get('/', (req, res) => {
  */
 router.delete('/:id', (req, res) => {
     const id = req.params.id
-    Customer.deleteOne({ _id: id })
+    Customer.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            if (result.ok == 1 && result.deletedCount == 0) {
-                res.status(404).json({
-                    message: 'Customer not found',
-                    error: {},
-                })
+            if (result.avatar) {
+                try {
+                    fs.unlinkSync(
+                        path.join(avatarPath, path.basename(result.avatar))
+                    )
+                } catch (err) {
+                    console.log('Error while removing avatar')
+                    console.log({ error: err })
+                }
             }
             res.status(200).json()
         })
