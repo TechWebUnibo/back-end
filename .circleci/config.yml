@@ -26,9 +26,9 @@ jobs:
             scp package.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
             scp package-lock.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
       - run:
-        name: Install packages
-        command: |
-          ssh antonio.lopez2@ines.cs.unibo.it 'cd /home/web/site202118/html; npm install'
+          name: Install packages
+          command: |
+            ssh antonio.lopez2@ines.cs.unibo.it 'cd /home/web/site202118/html; npm install'
 
 
 workflows:
