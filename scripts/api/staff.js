@@ -25,7 +25,9 @@ router.post('/', (req, res) => {
                 employee: newEmployee,
             })
         })
-        .catch((err) => res.status(400).json({message: 'Bad input parameter' ,error: err }))
+        .catch((err) =>
+            res.status(400).json({ message: 'Bad input parameter', error: err })
+        )
 })
 
 /**
@@ -39,10 +41,9 @@ router.get('/', (req, res) => {
             res.status(200).json(result)
         })
         .catch((err) => {
-            res.status(500).json({ message: 'Server error',  error: err })
+            res.status(500).json({ message: 'Server error', error: err })
         })
 })
-
 
 router.delete('/:id', (req, res) => {
     const id = req.params.id
@@ -62,7 +63,6 @@ router.delete('/:id', (req, res) => {
         })
 })
 
-
 router.post('/:id', (req, res) => {
     const id = req.params.id
     let newData = req.body
@@ -73,16 +73,20 @@ router.post('/:id', (req, res) => {
     )
         .exec()
         .then((result) => {
-            if(result)
-                res.status(200).json({ message: 'Data modified', employee: result })
+            if (result)
+                res.status(200).json({
+                    message: 'Data modified',
+                    employee: result,
+                })
             else
-                res.status(404).json({ message: 'Employee not found', employee: result })
-
+                res.status(404).json({
+                    message: 'Employee not found',
+                    employee: result,
+                })
         })
         .catch((err) => {
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
 })
-
 
 module.exports = router
