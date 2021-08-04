@@ -64,8 +64,8 @@ router.get('/', (req, res) => {
         })
 })
 
-function deleteAvatar(customer){
-    if(customer.avatar){
+function deleteAvatar(customer) {
+    if (customer.avatar) {
         try {
             fs.unlinkSync(
                 path.join(avatarFullPath, path.basename(customer.avatar))
@@ -88,7 +88,10 @@ router.delete('/:id', (req, res) => {
         .exec()
         .then((result) => {
             deleteAvatar(result)
-            res.status(200).json({message: 'Customer deleted', customer: result})
+            res.status(200).json({
+                message: 'Customer deleted',
+                customer: result,
+            })
         })
         .catch((err) => {
             res.status(404).json({
@@ -102,7 +105,9 @@ router.delete('/:id', (req, res) => {
 router.post('/:id', upload.single('avatar'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.avatar = req.file ? path.join(avatarPath, req.file.filename) : newData.avatar
+    newData.avatar = req.file
+        ? path.join(avatarPath, req.file.filename)
+        : newData.avatar
     Customer.findOneAndUpdate(
         { _id: id },
         { $set: newData },
