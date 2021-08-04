@@ -9,9 +9,19 @@ jobs:
           fingerprints:
             - "5e:b7:a8:8c:9b:16:ef:87:f4:6d:9a:11:5e:d8:da:10"
       - run:
-          name: Prettier check
+          name: Github config
           command: |
-            npm run prettier-check
+            git config user.email "antonio.lopez.8523@gmail.com"
+            git config user.name "elements72"
+      - run:
+          name: Prettier Write
+          command: |
+            npx prettier --write index.js ./scripts
+      - run:
+          name: Push changes to repo
+          command: |
+            git commit -am '[skip ci]'
+            git push
       - run:
           name: Build Docs
           command: |

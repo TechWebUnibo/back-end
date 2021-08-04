@@ -64,6 +64,19 @@ router.get('/', (req, res) => {
         })
 })
 
+function deleteAvatar(customer){
+    if(customer.avatar){
+        try {
+            fs.unlinkSync(
+                path.join(avatarFullPath, path.basename(customer.avatar))
+            )
+        } catch (err) {
+            console.log('Error while removing avatar')
+            console.log({ error: err })
+        }
+    }
+}
+
 /**
  * Delete the customer with the corresponding id.
  * @param {object} res - Response object.
@@ -74,17 +87,8 @@ router.delete('/:id', (req, res) => {
     Customer.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            if (result.avatar) {
-                try {
-                    fs.unlinkSync(
-                        path.join(avatarFullPath, path.basename(result.avatar))
-                    )
-                } catch (err) {
-                    console.log('Error while removing avatar')
-                    console.log({ error: err })
-                }
-            }
-            res.status(200).json()
+            deleteAvatar(result)
+            res.status(200).json({message: 'Customer deleted', customer: result})
         })
         .catch((err) => {
             res.status(404).json({
@@ -95,15 +99,18 @@ router.delete('/:id', (req, res) => {
 })
 
 // Modidy a customer
-router.post('/:id', (req, res) => {
+router.post('/:id', upload.single('avatar'), (req, res) => {
     const id = req.params.id
+    let newData = req.body
+    newData.avatar = req.file ? path.join(avatarPath, req.file.filename) : newData.avatar
     Customer.findOneAndUpdate(
         { _id: id },
-        { $set: req.body },
-        { runValidators: true, new: true, useFindAndModify: false }
+        { $set: newData },
+        { runValidators: true, new: false, useFindAndModify: false }
     )
         .exec()
         .then((result) => {
+            deleteAvatar(result)
             res.status(200).json({ message: 'Data modified', customer: result })
         })
         .catch((err) => {
