@@ -21,7 +21,7 @@ jobs:
           name: Push changes to repo
           command: |
             git commit -am '[skip ci]'
-            git push
+            git push origin develop
       - run:
           name: Build Docs
           command: |
