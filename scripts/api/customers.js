@@ -101,7 +101,7 @@ router.delete('/:id', (req, res) => {
         })
 })
 
-// Modidy a customer
+// Modify a customer
 router.post('/:id', upload.single('avatar'), (req, res) => {
     const id = req.params.id
     let newData = req.body
@@ -115,8 +115,13 @@ router.post('/:id', upload.single('avatar'), (req, res) => {
     )
         .exec()
         .then((result) => {
-            deleteAvatar(result)
-            res.status(200).json({ message: 'Data modified', customer: result })
+            if(result){
+                deleteAvatar(result)
+                res.status(200).json({ message: 'Data modified', customer: result })
+            }
+            else
+                res.status(404).json({ message: 'Customer not found', customer: result })
+                
         })
         .catch((err) => {
             res.status(400).json({ message: 'Bad input parameter', error: err })

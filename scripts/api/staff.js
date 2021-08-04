@@ -25,22 +25,64 @@ router.post('/', (req, res) => {
                 employee: newEmployee,
             })
         })
-        .catch((err) => res.status(400).json({ error: err }))
+        .catch((err) => res.status(400).json({message: 'Bad input parameter' ,error: err }))
 })
 
 /**
  * Return all the staff members.
  * @param {res} res Response object
  */
-router.get('/api/staff/', (req, res) => {
+router.get('/', (req, res) => {
     Employee.find()
         .exec()
-        .then((doc) => {
-            res.status(200).json(doc)
+        .then((result) => {
+            res.status(200).json(result)
         })
         .catch((err) => {
-            res.status(500).json({ error: err })
+            res.status(500).json({ message: 'Server error',  error: err })
         })
 })
+
+
+router.delete('/:id', (req, res) => {
+    const id = req.params.id
+    Employee.findOneAndDelete({ _id: id })
+        .exec()
+        .then((result) => {
+            res.status(200).json({
+                message: 'Employee deleted',
+                employee: result,
+            })
+        })
+        .catch((err) => {
+            res.status(404).json({
+                message: 'Employee not found',
+                error: err,
+            })
+        })
+})
+
+
+router.post('/:id', (req, res) => {
+    const id = req.params.id
+    let newData = req.body
+    Employee.findOneAndUpdate(
+        { _id: id },
+        { $set: newData },
+        { runValidators: true, new: false, useFindAndModify: false }
+    )
+        .exec()
+        .then((result) => {
+            if(result)
+                res.status(200).json({ message: 'Data modified', employee: result })
+            else
+                res.status(404).json({ message: 'Employee not found', employee: result })
+
+        })
+        .catch((err) => {
+            res.status(400).json({ message: 'Bad input parameter', error: err })
+        })
+})
+
 
 module.exports = router
