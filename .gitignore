@@ -6,3 +6,7 @@ npm-debug.log
 docs
 jsdoc.json
 public
+
+#Ignore keys
+
+*.key*

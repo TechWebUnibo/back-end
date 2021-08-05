@@ -10,6 +10,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const customers = require('./scripts/api/customers')
 const staff = require('./scripts/api/staff')
+const auth = require('./scripts/api/authentication')
 
 // Constants
 const mongoCredentials = {
@@ -19,6 +20,7 @@ const mongoCredentials = {
 }
 
 const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority`
+//const uri = 'mongodb://localhost:27017/NoloNoloPlus'
 const port = 8000
 const db = mongoose.connection
 
@@ -35,6 +37,7 @@ app.use('/img', express.static(global.rootDir + '/public/media/img'))
 // Set APIs route
 app.use('/api/customers/', customers)
 app.use('/api/staff/', staff)
+app.use('/api/login/', auth)
 
 // Connect the database
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -46,3 +49,4 @@ db.once('open', function () {
 app.listen(port, () => {
     console.log('Server is listening...')
 })
+

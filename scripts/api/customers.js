@@ -2,6 +2,7 @@
  * @file API for managing the customers
  * @author Antonio Lopez, Davide Cristoni, Gledis Gila
  * @module customers
+ * @todo Add unique to email
  */
 const express = require('express')
 const mongoose = require('mongoose')
@@ -9,6 +10,8 @@ const fs = require('fs')
 const Customer = require('./models/customer')
 const multer = require('multer')
 const path = require('path')
+const bcrypt = require('bcryptjs')
+const auth = require('./authentication')
 
 var router = express.Router()
 
@@ -33,6 +36,7 @@ const upload = multer({ storage: storage })
  */
 router.post('/', upload.single('avatar'), (req, res) => {
     let data = req.body
+    data.password = bcrypt.hashSync(data.password, 14)
     data._id = new mongoose.Types.ObjectId()
     data.avatar = req.file ? path.join(avatarPath, req.file.filename) : ''
     const newCustomer = new Customer(data)
@@ -82,7 +86,7 @@ function deleteAvatar(customer) {
  * @param {object} res - Response object.
  * @param {String} id  - Customer id.
  */
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth.verifyToken ,(req, res) => {
     const id = req.params.id
     Customer.findOneAndDelete({ _id: id })
         .exec()
@@ -102,9 +106,10 @@ router.delete('/:id', (req, res) => {
 })
 
 // Modify a customer
-router.post('/:id', upload.single('avatar'), (req, res) => {
+router.post('/:id', upload.single('avatar'), auth.verifyToken,(req, res) => {
     const id = req.params.id
     let newData = req.body
+    newData.password = bcrypt.hashSync(newData.password, 14)
     newData.avatar = req.file
         ? path.join(avatarPath, req.file.filename)
         : newData.avatar
