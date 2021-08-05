@@ -5,6 +5,8 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const Employee = require('./models/employee')
+const auth = require('./authentication')
+
 
 var router = express.Router()
 
@@ -15,6 +17,7 @@ var router = express.Router()
  */
 router.post('/', (req, res) => {
     const data = req.body
+    data.password = bcrypt.hashSync(data.password, 14)
     data._id = new mongoose.Types.ObjectId()
     const newEmployee = new Employee(data)
     newEmployee
@@ -44,15 +47,21 @@ router.get('/', (req, res) => {
 })
 
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     Employee.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            res.status(200).json({
-                message: 'Employee deleted',
-                employee: result,
-            })
+            if(result)
+                res.status(200).json({
+                    message: 'Employee deleted',
+                    employee: result,
+                })
+            else
+                res.status(404).json({
+                    message: 'Employee not found',
+                    employee: result,
+                })
         })
         .catch((err) => {
             res.status(404).json({
@@ -62,10 +71,11 @@ router.delete('/:id', (req, res) => {
         })
 })
 
-
-router.post('/:id', (req, res) => {
+// Modify a staff member
+router.post('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     let newData = req.body
+    newData.password = bcrypt.hashSync(newData.password, 14)
     Employee.findOneAndUpdate(
         { _id: id },
         { $set: newData },
