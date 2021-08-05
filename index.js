@@ -19,8 +19,7 @@ const mongoCredentials = {
     site: 'mongo_site202118',
 }
 
-const uri = `mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority`
-//const uri = 'mongodb://localhost:27017/NoloNoloPlus'
+const uri = `mongodb://localhost:27017/NoloNoloPlus`
 const port = 8000
 const db = mongoose.connection
 

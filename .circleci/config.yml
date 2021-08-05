@@ -28,6 +28,10 @@ jobs:
             npm install
             npm run doc
       - run:
+          name: Substitute testing uri
+          command: |
+            sed -i 's|mongodb://localhost:27017/NoloNoloPlus|mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority|' index.js
+      - run:
           name: Deploy
           command: | 
             ssh-keyscan -H ines.cs.unibo.it >> ~/.ssh/known_hosts
