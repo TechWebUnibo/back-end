@@ -48,12 +48,8 @@ router.get('/', (req, res) => {
         })
 })
 
-<<<<<<< HEAD
 
 router.delete('/:id', auth.verifyToken, (req, res) => {
-=======
-router.delete('/:id', (req, res) => {
->>>>>>> 777d9cac1ae90ffee903e11005c4770ac035d76a
     const id = req.params.id
     Employee.findOneAndDelete({ _id: id })
         .exec()
@@ -77,12 +73,8 @@ router.delete('/:id', (req, res) => {
         })
 })
 
-<<<<<<< HEAD
 // Modify a staff member
 router.post('/:id', auth.verifyToken, (req, res) => {
-=======
-router.post('/:id', (req, res) => {
->>>>>>> 777d9cac1ae90ffee903e11005c4770ac035d76a
     const id = req.params.id
     let newData = req.body
     newData.password = bcrypt.hashSync(newData.password, 14)
