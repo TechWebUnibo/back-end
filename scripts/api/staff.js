@@ -7,7 +7,6 @@ const mongoose = require('mongoose')
 const Employee = require('./models/employee')
 const auth = require('./authentication')
 
-
 var router = express.Router()
 
 /**
@@ -48,13 +47,12 @@ router.get('/', (req, res) => {
         })
 })
 
-
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     Employee.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            if(result)
+            if (result)
                 res.status(200).json({
                     message: 'Employee deleted',
                     employee: result,

@@ -86,7 +86,7 @@ function deleteAvatar(customer) {
  * @param {object} res - Response object.
  * @param {String} id  - Customer id.
  */
-router.delete('/:id', auth.verifyToken ,(req, res) => {
+router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     Customer.findOneAndDelete({ _id: id })
         .exec()
@@ -106,7 +106,7 @@ router.delete('/:id', auth.verifyToken ,(req, res) => {
 })
 
 // Modify a customer
-router.post('/:id', upload.single('avatar'), auth.verifyToken,(req, res) => {
+router.post('/:id', upload.single('avatar'), auth.verifyToken, (req, res) => {
     const id = req.params.id
     let newData = req.body
     newData.password = bcrypt.hashSync(newData.password, 14)
