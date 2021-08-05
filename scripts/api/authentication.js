@@ -23,10 +23,11 @@ const privateKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key'))
 function verifyToken(req, res, next) {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
-    if (token == null)
-        return res.sendStatus(401)
-    else { 
-        const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub'))  // get public key
+    if (token == null) return res.sendStatus(401)
+    else {
+        const publicKey = fs.readFileSync(
+            path.join(keysPath, 'jwtRS256.key.pub')
+        ) // get public key
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
             if (err) return res.sendStatus(403)
             else {
