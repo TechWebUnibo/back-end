@@ -16,7 +16,8 @@ const jwt = require('jsonwebtoken')
 
 
 var router = express.Router()
-const privateKey = fs.readFileSync('.keys/jwtRS256.key')
+const keysPath = path.join(global.rootDir, '.keys')
+const privateKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key'))
 
 /** 
 * Middlewere for manage JWT. Add a token field in the req object
@@ -27,7 +28,7 @@ function verifyToken(req, res, next){
     if (token == null)
         return res.sendStatus(401)
     else { 
-        const publicKey = fs.readFileSync('.keys/jwtRS256.key.pub');  // get public key
+        const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub'))  // get public key
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
             if(err)
                 return res.sendStatus(403)
