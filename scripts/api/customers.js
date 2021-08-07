@@ -36,7 +36,7 @@ const upload = multer({ storage: storage })
  */
 router.post('/', upload.single('avatar'), (req, res) => {
     let data = req.body
-    data.password = bcrypt.hashSync(data.password, 14)
+    data.password = data.password ? bcrypt.hashSync(data.password, 14) : undefined
     data._id = new mongoose.Types.ObjectId()
     data.avatar = req.file ? path.join(avatarPath, req.file.filename) : ''
     const newCustomer = new Customer(data)
@@ -48,9 +48,10 @@ router.post('/', upload.single('avatar'), (req, res) => {
                 customer: newCustomer,
             })
         })
-        .catch((err) =>
+        .catch((err) =>{
+            deleteAvatar(newCustomer.avatar)
             res.status(400).json({ message: 'Bad input parameter', error: err })
-        )
+        })
 })
 
 /**
@@ -68,11 +69,11 @@ router.get('/', (req, res) => {
         })
 })
 
-function deleteAvatar(customer) {
-    if (customer.avatar) {
+function deleteAvatar(avatar) {
+    if (avatar) {
         try {
             fs.unlinkSync(
-                path.join(avatarFullPath, path.basename(customer.avatar))
+                path.join(avatarFullPath, path.basename(avatar))
             )
         } catch (err) {
             console.log('Error while removing avatar')
@@ -91,7 +92,7 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
     Customer.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            deleteAvatar(result)
+            deleteAvatar(result.avatar)
             res.status(200).json({
                 message: 'Customer deleted',
                 customer: result,
@@ -106,10 +107,10 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 })
 
 // Modify a customer
-router.post('/:id', upload.single('avatar'), auth.verifyToken, (req, res) => {
+router.post('/:id', auth.verifyToken, upload.single('avatar'),  (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.password = bcrypt.hashSync(newData.password, 14)
+    newData.password = newData.password ? bcrypt.hashSync(newData.password, 14) : undefined
     newData.avatar = req.file
         ? path.join(avatarPath, req.file.filename)
         : newData.avatar
@@ -121,18 +122,19 @@ router.post('/:id', upload.single('avatar'), auth.verifyToken, (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
-                deleteAvatar(result)
                 res.status(200).json({
                     message: 'Data modified',
                     customer: result,
                 })
             } else
+                deleteAvatar(newData.avatar)
                 res.status(404).json({
                     message: 'Customer not found',
                     customer: result,
                 })
         })
         .catch((err) => {
+            deleteAvatar(newData.avatar)
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
 })

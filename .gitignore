@@ -7,6 +7,7 @@ docs
 jsdoc.json
 public
 
-#Ignore keys
+script.sh
 
+#Ignore keys for authentication
 *.key*

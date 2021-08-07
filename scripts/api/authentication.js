@@ -7,6 +7,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const Customer = require('./models/customer')
+const Employee = require('./models/employee')
 const fs = require('fs')
 const multer = require('multer')
 const path = require('path')
@@ -33,7 +34,7 @@ function verifyToken(req, res, next) {
             else {
                 // Check if the user is authorized to perform the request operation
                 if (decoded.role == 'customer') {
-                    if (decoded._id != req.params.id) {
+                    if (decoded._id != req.params.id || req.params.path.includes('products')) {
                         return res.sendStatus(403)
                     }
                 }
@@ -44,40 +45,53 @@ function verifyToken(req, res, next) {
     }
 }
 
+
+function verifyUser(user, data, res){
+    if (!user) {
+        res.status(404).json({ message: 'User not found' })
+    } else if (
+        !bcrypt.compareSync(data.password || '', user.password)
+    ) {
+        console.log(user.password)
+        res.status(403).json({ message: 'Wrong password' })
+    } else {
+        jwt.sign(
+            {
+                _id: user._id,
+                user: user.username,
+                role: user.role || 'customer',
+            },
+            privateKey,
+            { expiresIn: '1h', algorithm: 'RS256' },
+            (err, token) => {
+                if (err)
+                    res.status(500).json({ message: 'Internal error' })
+                else res.status(200).json({ accesToken: token })
+            }
+        )
+    }
+}
+
+function sendError(err){
+    console.log(err)
+    res.status(500).json({ message: 'Server error', error: err })
+}
+
 router.post('/customers', (req, res) => {
     let data = req.body
     Customer.findOne({ username: data.username })
         .exec()
-        .then((user) => {
-            if (!user) {
-                res.status(404).json({ message: 'User not found' })
-            } else if (
-                !bcrypt.compareSync(data.password || '', user.password)
-            ) {
-                res.status(403).json({ message: 'Wrong password' })
-            } else {
-                jwt.sign(
-                    {
-                        _id: user._id,
-                        user: user.username,
-                        role: user.role || 'customer',
-                    },
-                    privateKey,
-                    { expiresIn: '1h', algorithm: 'RS256' },
-                    (err, token) => {
-                        if (err)
-                            res.status(500).json({ message: 'Internal error' })
-                        else res.status(200).json({ accesToken: token })
-                    }
-                )
-            }
-        })
-        .catch((err) => {
-            console.log(err)
-
-            res.status(500).json({ message: 'Server error', error: err })
-        })
+        .then((user) => verifyUser(user, data, res))
+        .catch(sendError)
 })
+router.post('/staff', (req, res) => {
+    let data = req.body
+    Employee.findOne({ username: data.username })
+        .exec()
+        .then((user) => verifyUser(user, data, res))
+        .catch(sendError)
+})
+
 
 module.exports = router
 module.exports.verifyToken = verifyToken
