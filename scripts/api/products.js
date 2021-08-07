@@ -1,27 +1,28 @@
 /**
- * @file API for managing the customers
+ * @file API for managing the products
  * @author Antonio Lopez, Davide Cristoni, Gledis Gila
- * @module customers
+ * @module products
  * @todo Add unique to email
  */
 const express = require('express')
 const mongoose = require('mongoose')
-const fs = require('fs')
-const Customer = require('./models/customer')
+const Product = require('./models/product')
 const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const auth = require('./authentication')
+const fs = require('fs')
+
 
 var router = express.Router()
 
-const avatarPath = 'img/avatar'
-const avatarFullPath = path.join(global.rootDir, 'public/media/', avatarPath)
+const productsPath = 'img/products'
+const productsFullPath = path.join(global.rootDir, 'public/media/', productsPath)
 
 // Initialize local storage
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, avatarFullPath)
+        cb(null, productsFullPath)
     },
     filename: function (req, file, cb) {
         cb(null, Date.now() + path.extname(file.originalname)) //Appending extension
@@ -30,36 +31,52 @@ var storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
+
+function deleteImg(img) {
+    if (img) {
+        try {
+            fs.unlinkSync(
+                path.join(productsFullPath, path.basename(img))
+            )
+        } catch (err) {
+            console.log('Error while removing image')
+            console.log({ error: err })
+        }
+    }
+}
+
+
+
+
 /**
- * Add a new customer.
- * @param {object} data Data of the new customer
+ * Add a new product.
+ * @param {object} data Data of the new product
  */
-router.post('/', upload.single('avatar'), (req, res) => {
+router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
     let data = req.body
-    data.password = data.password ? bcrypt.hashSync(data.password, 14) : undefined
     data._id = new mongoose.Types.ObjectId()
-    data.avatar = req.file ? path.join(avatarPath, req.file.filename) : ''
-    const newCustomer = new Customer(data)
-    newCustomer
+    data.img = req.file ? path.join(productsPath, req.file.filename) : ''
+    const newProduct = new Product(data)
+    newProduct
         .save()
         .then((result) => {
             res.status(200).json({
-                message: 'Customer created',
-                customer: newCustomer,
+                message: 'Product created',
+                product: newProduct,
             })
         })
-        .catch((err) =>{
-            deleteAvatar(newCustomer.avatar)
+        .catch((err) => {
+            deleteImg(newProduct.img)
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
 })
 
 /**
- * Get all the customers.
+ * Get all the products.
  * @param {res} res Response object
  */
 router.get('/', (req, res) => {
-    Customer.find()
+    Product.find()
         .exec()
         .then((doc) => {
             res.status(200).json(doc)
@@ -69,52 +86,39 @@ router.get('/', (req, res) => {
         })
 })
 
-function deleteAvatar(avatar) {
-    if (avatar) {
-        try {
-            fs.unlinkSync(
-                path.join(avatarFullPath, path.basename(avatar))
-            )
-        } catch (err) {
-            console.log('Error while removing avatar')
-            console.log({ error: err })
-        }
-    }
-}
 
 /**
- * Delete the customer with the corresponding id.
+ * Delete the product with the corresponding id.
  * @param {object} res - Response object.
- * @param {String} id  - Customer id.
+ * @param {String} id  - Product id.
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Customer.findOneAndDelete({ _id: id })
+    Product.findOneAndDelete({ _id: id })
         .exec()
         .then((result) => {
-            deleteAvatar(result.avatar)
+            deleteImg(result.img)
             res.status(200).json({
-                message: 'Customer deleted',
-                customer: result,
+                message: 'Product deleted',
+                product: result,
             })
         })
         .catch((err) => {
             res.status(404).json({
-                message: 'Customer not found',
+                message: 'Product not found',
                 error: err,
             })
         })
 })
 
-// Modify a customer
-router.post('/:id', auth.verifyToken, upload.single('avatar'),  (req, res) => {
+// Modify a product
+router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.password = newData.password ? bcrypt.hashSync(newData.password, 14) : undefined
-    newData.avatar = req.file
-        ? path.join(avatarPath, req.file.filename)
-        : newData.avatar
-    Customer.findOneAndUpdate(
+    newData.img = req.file
+        ? path.join(productsPath, req.file.filename)
+        : newData.img
+    Product.findOneAndUpdate(
         { _id: id },
         { $set: newData },
         { runValidators: true, new: false, useFindAndModify: false }
@@ -122,19 +126,19 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'),  (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
+                deleteImg(result.img)
                 res.status(200).json({
                     message: 'Data modified',
-                    customer: result,
+                    product: result,
                 })
             } else
-                deleteAvatar(newData.avatar)
                 res.status(404).json({
-                    message: 'Customer not found',
-                    customer: result,
+                    message: 'Product not found',
+                    product: result,
                 })
         })
         .catch((err) => {
-            deleteAvatar(newData.avatar)
+            deleteImg(newData.img)
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
 })

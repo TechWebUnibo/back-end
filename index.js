@@ -11,6 +11,7 @@ const mongoose = require('mongoose')
 const customers = require('./scripts/api/customers')
 const staff = require('./scripts/api/staff')
 const auth = require('./scripts/api/authentication')
+const products = require('./scripts/api/products')
 
 // Constants
 const mongoCredentials = {
@@ -37,6 +38,7 @@ app.use('/img', express.static(global.rootDir + '/public/media/img'))
 app.use('/api/customers/', customers)
 app.use('/api/staff/', staff)
 app.use('/api/login/', auth)
+app.use('/api/products/', products)
 
 // Connect the database
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
