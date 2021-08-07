@@ -13,11 +13,14 @@ const bcrypt = require('bcryptjs')
 const auth = require('./authentication')
 const fs = require('fs')
 
-
 var router = express.Router()
 
 const productsPath = 'img/products'
-const productsFullPath = path.join(global.rootDir, 'public/media/', productsPath)
+const productsFullPath = path.join(
+    global.rootDir,
+    'public/media/',
+    productsPath
+)
 
 // Initialize local storage
 var storage = multer.diskStorage({
@@ -31,22 +34,16 @@ var storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-
 function deleteImg(img) {
     if (img) {
         try {
-            fs.unlinkSync(
-                path.join(productsFullPath, path.basename(img))
-            )
+            fs.unlinkSync(path.join(productsFullPath, path.basename(img)))
         } catch (err) {
             console.log('Error while removing image')
             console.log({ error: err })
         }
     }
 }
-
-
-
 
 /**
  * Add a new product.
@@ -85,7 +82,6 @@ router.get('/', (req, res) => {
             res.status(500).json({ message: 'Internal error', error: err })
         })
 })
-
 
 /**
  * Delete the product with the corresponding id.

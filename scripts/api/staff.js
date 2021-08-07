@@ -8,7 +8,6 @@ const Employee = require('./models/employee')
 const auth = require('./authentication')
 const bcrypt = require('bcryptjs')
 
-
 var router = express.Router()
 
 /**

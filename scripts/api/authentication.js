@@ -34,7 +34,10 @@ function verifyToken(req, res, next) {
             else {
                 // Check if the user is authorized to perform the request operation
                 if (decoded.role == 'customer') {
-                    if (decoded._id != req.params.id || req.params.path.includes('products')) {
+                    if (
+                        decoded._id != req.params.id ||
+                        req.params.path.includes('products')
+                    ) {
                         return res.sendStatus(403)
                     }
                 }
@@ -45,13 +48,10 @@ function verifyToken(req, res, next) {
     }
 }
 
-
-function verifyUser(user, data, res){
+function verifyUser(user, data, res) {
     if (!user) {
         res.status(404).json({ message: 'User not found' })
-    } else if (
-        !bcrypt.compareSync(data.password || '', user.password)
-    ) {
+    } else if (!bcrypt.compareSync(data.password || '', user.password)) {
         console.log(user.password)
         res.status(403).json({ message: 'Wrong password' })
     } else {
@@ -64,15 +64,14 @@ function verifyUser(user, data, res){
             privateKey,
             { expiresIn: '1h', algorithm: 'RS256' },
             (err, token) => {
-                if (err)
-                    res.status(500).json({ message: 'Internal error' })
+                if (err) res.status(500).json({ message: 'Internal error' })
                 else res.status(200).json({ accesToken: token })
             }
         )
     }
 }
 
-function sendError(err){
+function sendError(err) {
     console.log(err)
     res.status(500).json({ message: 'Server error', error: err })
 }
@@ -91,7 +90,6 @@ router.post('/staff', (req, res) => {
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-
 
 module.exports = router
 module.exports.verifyToken = verifyToken
