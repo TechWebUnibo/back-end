@@ -91,6 +91,7 @@ router.get('/', (req, res) => {
  * Delete the product with the corresponding id.
  * @param {object} res - Response object.
  * @param {String} id  - Product id.
+ * TODO - l'oggetto non va eliminato se esiste un noleggio a lui legato
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id

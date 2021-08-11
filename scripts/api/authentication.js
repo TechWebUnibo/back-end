@@ -32,10 +32,20 @@ function verifyToken(req, res, next) {
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
             if (err) return res.sendStatus(403)
             else {
+                // TODO - fattorizzare questo codice andando a richiamarlo solo con determinati URI
                 // Check if the user is authorized to perform the request operation
                 if (decoded.role == 'customer') {
-                    if (decoded._id != req.params.id || req.params.path.includes('products')) {
+                    if ((req.params.id && decoded._id != req.params.id) || (req.originalUrl.includes('products'))) {
                         return res.sendStatus(403)
+                    }
+                    // Check if the customer is requesting his own orders
+                    if (req.originalUrl.includes('rentals')){
+                        if (((req.query.customer && req.query.customer != decoded._id) || !req.query.customer) && req.method === "GET"){
+                            return res.sendStatus(403)
+                        }
+                        if (req.body.customer != decoded._id && req.method === "POST"){
+                            return res.sendStatus(403)
+                        }
                     }
                 }
                 req.user = decoded
