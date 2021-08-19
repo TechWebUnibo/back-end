@@ -36,7 +36,9 @@ const upload = multer({ storage: storage })
  */
 router.post('/', upload.single('avatar'), (req, res) => {
     let data = req.body
-    data.password = data.password ? bcrypt.hashSync(data.password, 14) : undefined
+    data.password = data.password
+        ? bcrypt.hashSync(data.password, 14)
+        : undefined
     data._id = new mongoose.Types.ObjectId()
     data.avatar = req.file ? path.join(avatarPath, req.file.filename) : ''
     const newCustomer = new Customer(data)
@@ -48,7 +50,7 @@ router.post('/', upload.single('avatar'), (req, res) => {
                 customer: newCustomer,
             })
         })
-        .catch((err) =>{
+        .catch((err) => {
             deleteAvatar(newCustomer.avatar)
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
@@ -72,9 +74,7 @@ router.get('/', (req, res) => {
 function deleteAvatar(avatar) {
     if (avatar) {
         try {
-            fs.unlinkSync(
-                path.join(avatarFullPath, path.basename(avatar))
-            )
+            fs.unlinkSync(path.join(avatarFullPath, path.basename(avatar)))
         } catch (err) {
             console.log('Error while removing avatar')
             console.log({ error: err })
@@ -107,10 +107,12 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 })
 
 // Modify a customer
-router.post('/:id', auth.verifyToken, upload.single('avatar'),  (req, res) => {
+router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.password = newData.password ? bcrypt.hashSync(newData.password, 14) : undefined
+    newData.password = newData.password
+        ? bcrypt.hashSync(newData.password, 14)
+        : undefined
     newData.avatar = req.file
         ? path.join(avatarPath, req.file.filename)
         : newData.avatar
@@ -126,12 +128,11 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'),  (req, res) => {
                     message: 'Data modified',
                     customer: result,
                 })
-            } else
-                deleteAvatar(newData.avatar)
-                res.status(404).json({
-                    message: 'Customer not found',
-                    customer: result,
-                })
+            } else deleteAvatar(newData.avatar)
+            res.status(404).json({
+                message: 'Customer not found',
+                customer: result,
+            })
         })
         .catch((err) => {
             deleteAvatar(newData.avatar)

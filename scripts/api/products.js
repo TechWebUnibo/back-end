@@ -7,17 +7,21 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const Product = require('./models/product')
+const Rent = require('./models/rent')
 const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const auth = require('./authentication')
 const fs = require('fs')
 
-
 var router = express.Router()
 
 const productsPath = 'img/products'
-const productsFullPath = path.join(global.rootDir, 'public/media/', productsPath)
+const productsFullPath = path.join(
+    global.rootDir,
+    'public/media/',
+    productsPath
+)
 
 // Initialize local storage
 var storage = multer.diskStorage({
@@ -31,22 +35,16 @@ var storage = multer.diskStorage({
 
 const upload = multer({ storage: storage })
 
-
 function deleteImg(img) {
     if (img) {
         try {
-            fs.unlinkSync(
-                path.join(productsFullPath, path.basename(img))
-            )
+            fs.unlinkSync(path.join(productsFullPath, path.basename(img)))
         } catch (err) {
             console.log('Error while removing image')
             console.log({ error: err })
         }
     }
 }
-
-
-
 
 /**
  * Add a new product.
@@ -86,22 +84,31 @@ router.get('/', (req, res) => {
         })
 })
 
-
 /**
  * Delete the product with the corresponding id.
  * @param {object} res - Response object.
  * @param {String} id  - Product id.
+ * TODO - l'oggetto non va eliminato se esiste un noleggio a lui legato
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Product.findOneAndDelete({ _id: id })
-        .exec()
-        .then((result) => {
-            deleteImg(result.img)
-            res.status(200).json({
-                message: 'Product deleted',
-                product: result,
-            })
+    Rent.exists({ products: id })
+        .then((found) => {
+            if (!found)
+                Product.findOneAndDelete({ _id: id })
+                    .exec()
+                    .then((result) => {
+                        res.status(200).json({
+                            message: 'Product deleted',
+                            product: result,
+                        })
+                    })
+            else
+                res.status(406).json({
+                    message:
+                        'The product cannot be deleted, it is used in some rent',
+                    error: {},
+                })
         })
         .catch((err) => {
             res.status(404).json({

@@ -5,11 +5,10 @@
  */
 
 const express = require('express')
-const mongoose = require('mongoose')
 const Customer = require('./models/customer')
 const Employee = require('./models/employee')
+const Rent = require('./models/rent')
 const fs = require('fs')
-const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
@@ -17,6 +16,51 @@ const jwt = require('jsonwebtoken')
 var router = express.Router()
 const keysPath = path.join(global.rootDir, '.keys')
 const privateKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key'))
+
+/**
+ * Verify if the user has the permission to get or start a new rent. A user can't start a rent
+ * for another and he cannot ask for the rentals of another one
+ * @summary Verify if the user has the permission to get or start a new rent
+ * @param {String} id - Id found in JWT
+ */
+function verifyRentAuth(req, res, id, next) {
+    // Time before the rent is not cancellable anymore
+    const elapseTime = 604800000 // A week
+    if (
+        req.method === 'GET' &&
+        ((req.query.customer && req.query.customer != id) ||
+            !req.query.customer)
+    ) {
+        return res.sendStatus(403).end()
+    }
+    if (req.body.customer != id && req.method === 'POST') {
+        return res.sendStatus(403).end()
+    }
+    if (req.method === 'DELETE') {
+        Rent.findOne({ _id: req.params.rentId })
+            .exec()
+            .then((result) => {
+                // Check if the user is deleting a rental that owns
+                if (result) {
+                    if (result.customer != id) return res.sendStatus(403).end()
+                    else if (
+                        Date.parse(result.start) - elapseTime <
+                        Date.now()
+                    ) {
+                        return res.sendStatus(403).end()
+                    } else next()
+                }
+            })
+            .catch((err) => {
+                res.status(404)
+                    .json({
+                        message: 'Rental not found',
+                        error: err,
+                    })
+                    .end()
+            })
+    } else next()
+}
 
 /**
  * Middlewere for manage JWT. Add a token field in the req object
@@ -30,29 +74,36 @@ function verifyToken(req, res, next) {
             path.join(keysPath, 'jwtRS256.key.pub')
         ) // get public key
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
-            if (err) return res.sendStatus(403)
+            if (err) return res.sendStatus(401)
             else {
-                // Check if the user is authorized to perform the request operation
+                // TODO - fattorizzare questo codice andando a richiamarlo solo con determinati URI
+                // Check if the user is authorized to perform the requested operation
+                // staff member can perform every operation
                 if (decoded.role == 'customer') {
-                    if (decoded._id != req.params.id || req.params.path.includes('products')) {
+                    if (
+                        (req.params.id && decoded._id != req.params.id) ||
+                        req.originalUrl.includes('products')
+                    )
                         return res.sendStatus(403)
-                    }
-                }
-                req.user = decoded
-                next()
+                    else if (req.originalUrl.includes('rentals'))
+                        verifyRentAuth(req, res, decoded._id, next)
+                    else next()
+                } else next()
             }
         })
     }
 }
 
-
-function verifyUser(user, data, res){
+/**
+ * Authenticate a customer or a staff member. Generate a JWT token for later authorizations
+ * @param {*} user User to authenticate
+ * @param {*} data Data provided
+ * @param {*} res Response object
+ */
+function verifyUser(user, data, res) {
     if (!user) {
         res.status(404).json({ message: 'User not found' })
-    } else if (
-        !bcrypt.compareSync(data.password || '', user.password)
-    ) {
-        console.log(user.password)
+    } else if (!bcrypt.compareSync(data.password || '', user.password)) {
         res.status(403).json({ message: 'Wrong password' })
     } else {
         jwt.sign(
@@ -64,15 +115,14 @@ function verifyUser(user, data, res){
             privateKey,
             { expiresIn: '1h', algorithm: 'RS256' },
             (err, token) => {
-                if (err)
-                    res.status(500).json({ message: 'Internal error' })
+                if (err) res.status(500).json({ message: 'Internal error' })
                 else res.status(200).json({ accesToken: token })
             }
         )
     }
 }
 
-function sendError(err){
+function sendError(err) {
     console.log(err)
     res.status(500).json({ message: 'Server error', error: err })
 }
@@ -91,7 +141,6 @@ router.post('/staff', (req, res) => {
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-
 
 module.exports = router
 module.exports.verifyToken = verifyToken
