@@ -4,7 +4,7 @@
  */
 
 const mongoose = require('mongoose')
-const opts = { toJSON: { virtuals: true } };
+const opts = { toJSON: { virtuals: true } }
 // Product schema used for single products and bundles.
 // Custom validators are used for consistency
 const productSchema = mongoose.Schema({
@@ -12,7 +12,7 @@ const productSchema = mongoose.Schema({
     name: {
         type: String,
         required: true,
-        unique: true
+        unique: true,
     },
     type: {
         type: String,
@@ -25,20 +25,23 @@ const productSchema = mongoose.Schema({
 
     img: {
         type: String,
-        required: true
+        required: true,
     },
 
     condition: {
         type: String,
-        enum: ['perfect', 'good', 'suitable' ,'broken','not available'],
+        enum: ['perfect', 'good', 'suitable', 'broken', 'not available'],
         required: function () {
-            return (this.type !== 'bundle')
+            return this.type !== 'bundle'
         },
         validate: {
             validator: () => {
-                return !(typeof this.condition === undefined && this.type === 'bundle')
-            }
-        }    
+                return !(
+                    typeof this.condition === undefined &&
+                    this.type === 'bundle'
+                )
+            },
+        },
     },
     products: {
         type: [String],
@@ -48,10 +51,12 @@ const productSchema = mongoose.Schema({
         validate: {
             // Check if it is a bundle
             validator: () => {
-                return (typeof this.products !== undefined && this.type !== 'bundle')
-            }
-        }
-    }
+                return (
+                    typeof this.products !== undefined && this.type !== 'bundle'
+                )
+            },
+        },
+    },
 })
 
 /*

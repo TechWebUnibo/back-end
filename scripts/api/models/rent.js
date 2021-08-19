@@ -15,42 +15,50 @@ const rentSchema = mongoose.Schema({
         ref: 'Customer',
         required: true,
         validate: {
-            validator: (id) => { return Customer.exists({ _id: id })},
-            message: "Invalid customer"
-        }
+            validator: (id) => {
+                return Customer.exists({ _id: id })
+            },
+            message: 'Invalid customer',
+        },
     },
-    employee:{
+    employee: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Employee',
         required: true,
         validate: {
-            validator: (id) => { return Employee.exists({ _id: id }) },
-            message: "Invalid employee"
-        }
+            validator: (id) => {
+                return Employee.exists({ _id: id })
+            },
+            message: 'Invalid employee',
+        },
     },
-    products:[{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product',
-        required: true,
-        validate: {
-            validator: (id) => { return Product.exists({ _id: id}) },
-            message: "Invalid product"
-        }
-    }],
+    products: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true,
+            validate: {
+                validator: (id) => {
+                    return Product.exists({ _id: id })
+                },
+                message: 'Invalid product',
+            },
+        },
+    ],
     start: {
         type: Date,
         required: true,
-
     },
     end: {
         type: Date,
         required: true,
         validate: {
-            validator: function (){ return this.start < this.end },
-            message: "Start should be before the end of the rent"
-        }
-    }
+            validator: function () {
+                return this.start < this.end
+            },
+            message: 'Start should be before the end of the rent',
+        },
+    },
 })
-
 
 module.exports = mongoose.model('Rent', rentSchema)
