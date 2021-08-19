@@ -43,8 +43,7 @@ function verifyRentAuth(req, res, id, next) {
                 // Check if the user is deleting a rental that owns
                 if (result) {
                     if (result.customer != id) return res.sendStatus(403).end()
-                    else if 
-                    (
+                    else if (
                         Date.parse(result.start) - elapseTime <
                         Date.now()
                     ) {
