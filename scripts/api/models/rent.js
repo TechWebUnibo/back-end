@@ -61,4 +61,8 @@ const rentSchema = mongoose.Schema({
     },
 })
 
+// TODO - come tenere traccia del noleggio di un bundle?
+// per i prodotti non c'e' problema si ricercano e si vedono se sono disponibili
+// non si saprebbe pero' se tali oggetti sono stati presi con un bundle o meno
+
 module.exports = mongoose.model('Rent', rentSchema)

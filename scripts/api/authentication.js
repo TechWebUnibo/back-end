@@ -33,10 +33,12 @@ function verifyRentAuth(req, res, id, next) {
     ) {
         return res.sendStatus(403).end()
     }
-    if (req.body.customer != id && req.method === 'POST') {
+    if (req.body.customer != id && req.method === 'POST' && !req.params.rentId) {
         return res.sendStatus(403).end()
     }
-    if (req.method === 'DELETE') {
+    // For modifing and deleting the user must owns the rent and he can perform the operation
+    // until a certain time before the start of the rent
+    if (req.method === 'DELETE' || (req.method === 'POST' && req.params.rentId)) {
         Rent.findOne({ _id: req.params.rentId })
             .exec()
             .then((result) => {
