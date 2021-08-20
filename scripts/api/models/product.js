@@ -25,7 +25,6 @@ const productSchema = mongoose.Schema({
 
     img: {
         type: String,
-        required: true,
     },
 
     condition: {
@@ -35,10 +34,10 @@ const productSchema = mongoose.Schema({
             return this.type !== 'bundle'
         },
         validate: {
-            validator: () => {
-                return !(
-                    typeof this.condition === undefined &&
-                    this.type === 'bundle'
+            validator: function () {
+                return (
+                    (typeof this.condition === "undefined" && this.type === 'bundle') ||
+                    (typeof this.condition !== "undefined" && this.type !== 'bundle')
                 )
             },
         },
@@ -46,13 +45,14 @@ const productSchema = mongoose.Schema({
     products: {
         type: [String],
         required: function () {
-            return this.type == 'bundle'
+            return this.type === 'bundle'
         },
         validate: {
             // Check if it is a bundle
-            validator: () => {
+            validator: function ()  {
                 return (
-                    typeof this.products !== undefined && this.type !== 'bundle'
+                    (this.products.length && this.type === 'bundle') ||
+                    (!this.products.length && this.type !== 'bundle') 
                 )
             },
         },
