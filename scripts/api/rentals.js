@@ -52,23 +52,21 @@ router.get('/', auth.verifyToken, (req, res) => {
         })
 })
 
-
 router.post('/:rentId', auth.verifyToken, (req, res) => {
     const rentId = req.params.rentId
     const newData = req.body
-    Rent.findOneAndUpdate({_id: rentId}, {$set: newData})
-    .exec()
-    .then((result) => {
-        if(result){
-            res.status(200).json(result).json(result)
-        }
-        else{
-            res.status(404).json({message: 'Rent not found', error: {}})
-        }
-    })
-    .catch((err) => {
-        res.status(400).json({message: 'Bad input parameter', error: err})
-    })
+    Rent.findOneAndUpdate({ _id: rentId }, { $set: newData })
+        .exec()
+        .then((result) => {
+            if (result) {
+                res.status(200).json(result).json(result)
+            } else {
+                res.status(404).json({ message: 'Rent not found', error: {} })
+            }
+        })
+        .catch((err) => {
+            res.status(400).json({ message: 'Bad input parameter', error: err })
+        })
 })
 
 router.delete('/:rentId', auth.verifyToken, (req, res) => {

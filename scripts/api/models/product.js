@@ -36,8 +36,10 @@ const productSchema = mongoose.Schema({
         validate: {
             validator: function () {
                 return (
-                    (typeof this.condition === "undefined" && this.type === 'bundle') ||
-                    (typeof this.condition !== "undefined" && this.type !== 'bundle')
+                    (typeof this.condition === 'undefined' &&
+                        this.type === 'bundle') ||
+                    (typeof this.condition !== 'undefined' &&
+                        this.type !== 'bundle')
                 )
             },
         },
@@ -49,10 +51,10 @@ const productSchema = mongoose.Schema({
         },
         validate: {
             // Check if it is a bundle
-            validator: function ()  {
+            validator: function () {
                 return (
                     (this.products.length && this.type === 'bundle') ||
-                    (!this.products.length && this.type !== 'bundle') 
+                    (!this.products.length && this.type !== 'bundle')
                 )
             },
         },
