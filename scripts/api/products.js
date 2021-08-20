@@ -69,6 +69,9 @@ router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
         })
 })
 
+// TODO - only the type of the product
+// TODO - make a function that check if a product is available
+
 /**
  * Get all the products.
  * @param {res} res Response object
