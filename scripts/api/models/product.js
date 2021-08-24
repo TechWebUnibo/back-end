@@ -22,7 +22,7 @@ const productSchema = mongoose.Schema({
         type: String,
     },
     products: {
-        type: [mongoose.Schema.Types.ObjectId]
+        type: [mongoose.Schema.Types.ObjectId],
     },
 })
 

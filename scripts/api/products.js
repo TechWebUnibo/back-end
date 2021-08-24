@@ -175,73 +175,81 @@ router.get('/:id/available', async (req, res) => {
     var start = req.query.start
     var end = req.query.end
 
-    if((!start || !end) || start > end)
-        res.status(400).json({message: 'Bad query', error: {}})
-    else{
-        const category = await Product.findOne({_id: id})
-        if(category){
-            let products = category.products.length === 0 ? [id] : category.products
+    if (!start || !end || start > end)
+        res.status(400).json({ message: 'Bad query', error: {} })
+    else {
+        const category = await Product.findOne({ _id: id })
+        if (category) {
+            let products =
+                category.products.length === 0 ? [id] : category.products
             let response = []
             for (const product of products) {
                 let items = await getAvailable(product, start, end)
-                if(items.length > 0){
-                    let chosen = items.reduce((chosen, item) => item.price < chosen.price ? item : chosen, items[0])
+                if (items.length > 0) {
+                    let chosen = items.reduce(
+                        (chosen, item) =>
+                            item.price < chosen.price ? item : chosen,
+                        items[0]
+                    )
                     response.push(chosen)
-                }
-                else{
+                } else {
                     res.status(200).json({ available: false })
                     return
                 }
             }
-                res.status(200).json({available: true, products: response.map(item => {return item['_id']}), price: computePrice(response, start, end)})
-        }
-        else{
-            res.status(404).json({message: 'Product not found', error: {}})
+            res.status(200).json({
+                available: true,
+                products: response.map((item) => {
+                    return item['_id']
+                }),
+                price: computePrice(response, start, end),
+            })
+        } else {
+            res.status(404).json({ message: 'Product not found', error: {} })
         }
     }
-    
 })
 
-async function getAvailable(id, start, end){
+async function getAvailable(id, start, end) {
     let items = await Item.find({ type: id })
     let freeItems = []
     for (let item of items) {
         let occupied = await Rent.exists({
-        products: item,
-        $or: [
-            { start: { $gt: start, $lt: end } },
-            { end: { $gt: start, $lt: end } },
-            { start: { $lt: start }, end: { $gt: end } },
+            products: item,
+            $or: [
+                { start: { $gt: start, $lt: end } },
+                { end: { $gt: start, $lt: end } },
+                { start: { $lt: start }, end: { $gt: end } },
             ],
         })
         // Compute the price for the possible rent
-        if (!occupied && item.condition !== 'not available'){ 
+        if (!occupied && item.condition !== 'not available') {
             freeItems.push(item)
-            }
         }
+    }
     return freeItems
 }
-/** 
-* Compute the price for the given item
-* @summary Price for the rent.
-* @param {Object} item - Items to rent.
-* @param {Date} start - Start of the rent
-* @param {Date} end - End of the rent
-* @return {Number} Price of the rent
-*/
-function computePrice(items, start, end){
-    const conditions = {perfect: 0, good: 0.05, suitable: 0.1}
+/**
+ * Compute the price for the given item
+ * @summary Price for the rent.
+ * @param {Object} item - Items to rent.
+ * @param {Date} start - Start of the rent
+ * @param {Date} end - End of the rent
+ * @return {Number} Price of the rent
+ */
+function computePrice(items, start, end) {
+    const conditions = { perfect: 0, good: 0.05, suitable: 0.1 }
     const bundleDiscount = 0.1
     const renewTime = 86400000
-    
+
     // To obtain the number of days: perform a integer division of the timestamp difference with the value of a day
-    const days = Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
+    const days =
+        Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
     let price = 0
-    for(let item of items)
-        price = price + item.price - (item.price * conditions[item.condition])
+    for (let item of items)
+        price = price + item.price - item.price * conditions[item.condition]
     price = price * days
-    if(items.length > 1)
-        price = price - price * bundleDiscount
+    if (items.length > 1) price = price - price * bundleDiscount
     return price
 }
 
