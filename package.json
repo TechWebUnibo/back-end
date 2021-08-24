@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "serve": "nodemon index.js",
-    "prettier-check": "npx prettier --check index.js ./scripts",
+    "prettier-write": "npx prettier --write index.js ./scripts",
     "doc": "jsdoc -c jsdoc.json"
   },
   "repository": {
@@ -21,6 +21,7 @@
   "homepage": "https://github.com/TechWebUnibo/back-end#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "jsdoc": "^3.6.7",
     "jsonwebtoken": "^8.5.1",

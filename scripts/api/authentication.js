@@ -91,7 +91,7 @@ function verifyToken(req, res, next) {
                 if (decoded.role == 'customer') {
                     if (
                         (req.params.id && decoded._id != req.params.id) ||
-                        req.originalUrl.includes('products')
+                        req.originalUrl.includes('items')
                     )
                         return res.sendStatus(403)
                     else if (req.originalUrl.includes('rentals'))

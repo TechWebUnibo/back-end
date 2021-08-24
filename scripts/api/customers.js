@@ -115,7 +115,7 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
         : undefined
     newData.avatar = req.file
         ? path.join(avatarPath, req.file.filename)
-        : newData.avatar
+        : undefinded
     Customer.findOneAndUpdate(
         { _id: id },
         { $set: newData },
@@ -124,15 +124,18 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
+                deleteAvatar(result.avatar)
                 res.status(200).json({
                     message: 'Data modified',
                     customer: result,
                 })
-            } else deleteAvatar(newData.avatar)
-            res.status(404).json({
-                message: 'Customer not found',
-                customer: result,
-            })
+            } else {
+                deleteAvatar(newData.avatar)
+                res.status(404).json({
+                    message: 'Customer not found',
+                    customer: result,
+                })
+            }
         })
         .catch((err) => {
             deleteAvatar(newData.avatar)

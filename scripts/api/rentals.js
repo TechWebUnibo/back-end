@@ -7,7 +7,7 @@
 
 const express = require('express')
 const mongoose = require('mongoose')
-const Product = require('./models/product')
+const Item = require('./models/item')
 const Customer = require('./models/customer')
 const Employee = require('./models/employee')
 const Rent = require('./models/rent')

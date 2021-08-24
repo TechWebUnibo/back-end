@@ -4,26 +4,29 @@
  */
 
 const mongoose = require('mongoose')
-
+const opts = { toJSON: { virtuals: true } }
 // Product schema used for single products and bundles.
 // Custom validators are used for consistency
-const productSchema = mongoose.Schema({
+const itemSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     name: {
         type: String,
         required: true,
         unique: true,
     },
-    description: {
-        type: String,
+    type: {
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
     },
-    img: {
-        type: String,
+    price: {
+        type: Number,
+        required: true,
     },
-    products: {
-        type: [mongoose.Schema.Types.ObjectId]
+    condition: {
+        type: String,
+        enum: ['perfect', 'good', 'suitable', 'broken', 'not available'],
+        required: true,
     },
 })
 
-module.exports = mongoose.model('Product', productSchema)
+module.exports = mongoose.model('Item', itemSchema)

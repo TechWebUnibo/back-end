@@ -6,6 +6,7 @@
  */
 const express = require('express')
 const mongoose = require('mongoose')
+const Item = require('./models/item')
 const Product = require('./models/product')
 const Rent = require('./models/rent')
 const multer = require('multer')
@@ -53,13 +54,13 @@ function deleteImg(img) {
 router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
     let data = req.body
     data._id = new mongoose.Types.ObjectId()
-    data.img = req.file ? path.join(productsPath, req.file.filename) : ''
+    data.img = path.join(productsPath, req.file.filename)
     const newProduct = new Product(data)
     newProduct
         .save()
         .then((result) => {
             res.status(200).json({
-                message: 'Product created',
+                message: 'Item created',
                 product: newProduct,
             })
         })
@@ -77,7 +78,21 @@ router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
  * @param {res} res Response object
  */
 router.get('/', (req, res) => {
-    Product.find()
+    const query = req.query
+    Product.find(query)
+        .exec()
+        .then((doc) => {
+            res.status(200).json(doc)
+        })
+        .catch((err) => {
+            res.status(500).json({ message: 'Internal error', error: err })
+        })
+})
+
+router.get(':/id/available', (req, res) => {
+    const id = req.params.id
+    Item.find()
+        .distinct('type')
         .exec()
         .then((doc) => {
             res.status(200).json(doc)
@@ -88,46 +103,47 @@ router.get('/', (req, res) => {
 })
 
 /**
- * Delete the product with the corresponding id.
+ * Delete the category with the corresponding id.
  * @param {object} res - Response object.
- * @param {String} id  - Product id.
- * TODO - l'oggetto non va eliminato se esiste un noleggio a lui legato
+ * @param {String} id  - Category id.
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Rent.exists({ products: id })
+    Item.exists({ type: id })
         .then((found) => {
             if (!found)
                 Product.findOneAndDelete({ _id: id })
                     .exec()
                     .then((result) => {
+                        deleteImg(result.img)
                         res.status(200).json({
-                            message: 'Product deleted',
-                            product: result,
+                            message: 'Category deleted',
+                            item: result,
                         })
                     })
             else
                 res.status(406).json({
                     message:
-                        'The product cannot be deleted, it is used in some rent',
+                        'The category cannot be deleted, it is used in some item',
                     error: {},
                 })
         })
         .catch((err) => {
             res.status(404).json({
-                message: 'Product not found',
+                message: 'Category not found',
                 error: err,
             })
         })
 })
 
-// Modify a product
+// Modify a category
 router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.img = req.file
-        ? path.join(productsPath, req.file.filename)
-        : newData.img
+    if (req.file)
+        newData.img = req.file
+            ? path.join(productsPath, req.file.filename)
+            : undefined
     Product.findOneAndUpdate(
         { _id: id },
         { $set: newData },
@@ -141,16 +157,92 @@ router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
                     message: 'Data modified',
                     product: result,
                 })
-            } else
+            } else {
+                deleteImg(newData.img)
                 res.status(404).json({
                     message: 'Product not found',
                     product: result,
                 })
+            }
         })
         .catch((err) => {
-            deleteImg(newData.img)
             res.status(400).json({ message: 'Bad input parameter', error: err })
         })
 })
+
+router.get('/:id/available', async (req, res) => {
+    let id = req.params.id
+    var start = req.query.start
+    var end = req.query.end
+
+    if((!start || !end) || start > end)
+        res.status(400).json({message: 'Bad query', error: {}})
+    else{
+        const category = await Product.findOne({_id: id})
+        if(category){
+            let products = category.products.length === 0 ? [id] : category.products
+            let response = []
+            for (const product of products) {
+                let items = await getAvailable(product, start, end)
+                if(items.length > 0){
+                    let chosen = items.reduce((chosen, item) => item.price < chosen.price ? item : chosen, items[0])
+                    response.push(chosen)
+                }
+                else{
+                    res.status(200).json({ available: false })
+                    return
+                }
+            }
+                res.status(200).json({available: true, products: response.map(item => {return item['_id']}), price: computePrice(response, start, end)})
+        }
+        else{
+            res.status(404).json({message: 'Product not found', error: {}})
+        }
+    }
+    
+})
+
+async function getAvailable(id, start, end){
+    let items = await Item.find({ type: id })
+    let freeItems = []
+    for (let item of items) {
+        let occupied = await Rent.exists({
+        products: item,
+        $or: [
+            { start: { $gt: start, $lt: end } },
+            { end: { $gt: start, $lt: end } },
+            { start: { $lt: start }, end: { $gt: end } },
+            ],
+        })
+        // Compute the price for the possible rent
+        if (!occupied && item.condition !== 'not available'){ 
+            freeItems.push(item)
+            }
+        }
+    return freeItems
+}
+/** 
+* Compute the price for the given item
+* @summary Price for the rent.
+* @param {Object} item - Items to rent.
+* @param {Date} start - Start of the rent
+* @param {Date} end - End of the rent
+* @return {Number} Price of the rent
+*/
+function computePrice(items, start, end){
+    const conditions = {perfect: 0, good: 0.05, suitable: 0.1}
+    const bundleDiscount = 0.1
+    const renewTime = 86400000
+    
+    // To obtain the number of days: perform a integer division of the timestamp difference with the value of a day
+    const days = Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
+    let price = 0
+    for(let item of items)
+        price = price + item.price - (item.price * conditions[item.condition])
+    price = price * days
+    if(items.length > 1)
+        price = price - price * bundleDiscount
+    return price
+}
 
 module.exports = router
