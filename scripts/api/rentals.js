@@ -30,12 +30,10 @@ router.post('/', auth.verifyToken, async (req, res) => {
         )
         // If some article is no more available notify the user
         if (occupied) {
-            return res
-                .status(400)
-                .json({
-                    message: 'The products chosen are not available',
-                    error: {},
-                })
+            return res.status(400).json({
+                message: 'The products chosen are not available',
+                error: {},
+            })
         }
     }
     let items = await Promise.all(

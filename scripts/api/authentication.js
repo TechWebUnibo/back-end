@@ -102,20 +102,18 @@ function verifyToken(req, res, next) {
         })
     }
 }
-/** 
-* Middleware used to check if a user is logged 
-* @summary If a user has a valid token add the token information to the request object
-*/
+/**
+ * Middleware used to check if a user is logged
+ * @summary If a user has a valid token add the token information to the request object
+ */
 
-function verifyLogin(req, res, next){
+function verifyLogin(req, res, next) {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
-    const publicKey = fs.readFileSync(
-        path.join(keysPath, 'jwtRS256.key.pub')
-    ) // get public key
-    if (token != null){
+    const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
+    if (token != null) {
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
-            if(!err) req.user = decoded
+            if (!err) req.user = decoded
         })
     }
     next()

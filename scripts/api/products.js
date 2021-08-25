@@ -178,18 +178,23 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     if (!start || !end || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {
-
         const category = await Product.findOne({ _id: id })
         if (category) {
             let products =
                 category.products.length === 0 ? [id] : category.products
             let response = []
             if (!req.user) {
-                for (const product of products){
-                    let items = await Item.find({type: product, condition: {$ne: 'not available'}})
+                for (const product of products) {
+                    let items = await Item.find({
+                        type: product,
+                        condition: { $ne: 'not available' },
+                    })
                     let chosen = items.reduce(
                         (chosen, item) =>
-                            support.computePrice([item], start, end) < support.computePrice([chosen], start, end) ? item : chosen,
+                            support.computePrice([item], start, end) <
+                            support.computePrice([chosen], start, end)
+                                ? item
+                                : chosen,
                         items[0]
                     )
                     response.push(chosen)
@@ -200,15 +205,17 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
                     }),
                     price: support.computePrice(response, start, end),
                 })
-            }
-            else{
+            } else {
                 for (const product of products) {
                     let items = await support.getAvailable(product, start, end)
                     console.log(items)
                     if (items.length > 0) {
                         let chosen = items.reduce(
                             (chosen, item) =>
-                                support.computePrice([item], start, end) < support.computePrice([chosen], start, end) ? item : chosen,
+                                support.computePrice([item], start, end) <
+                                support.computePrice([chosen], start, end)
+                                    ? item
+                                    : chosen,
                             items[0]
                         )
                         response.push(chosen)
