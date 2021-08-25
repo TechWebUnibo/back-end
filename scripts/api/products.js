@@ -8,7 +8,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Item = require('./models/item')
 const Product = require('./models/product')
-const Rent = require('./models/rent')
+const support = require('./support')
 const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
@@ -109,7 +109,7 @@ router.get(':/id/available', (req, res) => {
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Item.exists({ type: id })
+    Item.exists({ type: id })   
         .then((found) => {
             if (!found)
                 Product.findOneAndDelete({ _id: id })
@@ -184,7 +184,7 @@ router.get('/:id/available', async (req, res) => {
                 category.products.length === 0 ? [id] : category.products
             let response = []
             for (const product of products) {
-                let items = await getAvailable(product, start, end)
+                let items = await support.getAvailable(product, start, end)
                 if (items.length > 0) {
                     let chosen = items.reduce(
                         (chosen, item) =>
@@ -202,7 +202,7 @@ router.get('/:id/available', async (req, res) => {
                 products: response.map((item) => {
                     return item['_id']
                 }),
-                price: computePrice(response, start, end),
+                price: support.computePrice(response, start, end),
             })
         } else {
             res.status(404).json({ message: 'Product not found', error: {} })
@@ -210,47 +210,5 @@ router.get('/:id/available', async (req, res) => {
     }
 })
 
-async function getAvailable(id, start, end) {
-    let items = await Item.find({ type: id })
-    let freeItems = []
-    for (let item of items) {
-        let occupied = await Rent.exists({
-            products: item,
-            $or: [
-                { start: { $gt: start, $lt: end } },
-                { end: { $gt: start, $lt: end } },
-                { start: { $lt: start }, end: { $gt: end } },
-            ],
-        })
-        // Compute the price for the possible rent
-        if (!occupied && item.condition !== 'not available') {
-            freeItems.push(item)
-        }
-    }
-    return freeItems
-}
-/**
- * Compute the price for the given item
- * @summary Price for the rent.
- * @param {Object} item - Items to rent.
- * @param {Date} start - Start of the rent
- * @param {Date} end - End of the rent
- * @return {Number} Price of the rent
- */
-function computePrice(items, start, end) {
-    const conditions = { perfect: 0, good: 0.05, suitable: 0.1 }
-    const bundleDiscount = 0.1
-    const renewTime = 86400000
-
-    // To obtain the number of days: perform a integer division of the timestamp difference with the value of a day
-    const days =
-        Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
-    let price = 0
-    for (let item of items)
-        price = price + item.price - item.price * conditions[item.condition]
-    price = price * days
-    if (items.length > 1) price = price - price * bundleDiscount
-    return price
-}
 
 module.exports = router

@@ -35,7 +35,7 @@ const rentSchema = mongoose.Schema({
     products: [
         {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Product',
+            ref: 'Item',
             required: true,
             validate: {
                 validator: (id) => {
@@ -45,6 +45,12 @@ const rentSchema = mongoose.Schema({
             },
         },
     ],
+
+    price:{
+        type: Number,
+        required: true
+    },
+
     start: {
         type: Date,
         required: true,
@@ -54,7 +60,7 @@ const rentSchema = mongoose.Schema({
         required: true,
         validate: {
             validator: function () {
-                return this.start < this.end
+                return this.start <= this.end
             },
             message: 'Start should be before the end of the rent',
         },
