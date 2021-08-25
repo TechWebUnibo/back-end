@@ -4,7 +4,6 @@
  * @module products
  */
 
-
 const Item = require('./models/item')
 const Product = require('./models/product')
 const Rent = require('./models/rent')
@@ -21,23 +20,23 @@ async function getAvailable(id, start, end) {
     return freeItems
 }
 
-/** 
-* Check if a item is available in the given date.
-* @summary Check if an item is available.
-* @param {Array} items - Item to be checked
-* @param {Date} start - Start date
-* @param {Date} end - End date
-* @return {Boolean} Brief description of the returning value here.
-*/
-async function checkAvailability(item, start, end){
-    return occupied = await Rent.exists({
+/**
+ * Check if a item is available in the given date.
+ * @summary Check if an item is available.
+ * @param {Array} items - Item to be checked
+ * @param {Date} start - Start date
+ * @param {Date} end - End date
+ * @return {Boolean} Brief description of the returning value here.
+ */
+async function checkAvailability(item, start, end) {
+    return (occupied = await Rent.exists({
         products: item,
         $or: [
             { start: { $gte: start, $lte: end } },
             { end: { $gte: start, $lte: end } },
             { start: { $lte: start }, end: { $gte: end } },
         ],
-    })
+    }))
 }
 
 /**
@@ -57,14 +56,13 @@ function computePrice(items, start, end) {
     const days =
         Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
     let price = 0
-    for (let item of items){
+    for (let item of items) {
         price = price + item.price - item.price * conditions[item.condition]
     }
     price = price * days
     if (items.length > 1) price = price - price * bundleDiscount
-    return Math.floor(price);
+    return Math.floor(price)
 }
-
 
 exports.computePrice = computePrice
 exports.getAvailable = getAvailable

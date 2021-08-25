@@ -23,17 +23,37 @@ router.post('/', auth.verifyToken, async (req, res) => {
     newRent = new Rent(data)
     // Check the consistancy of the price and the real availability of the products
     for (let item of newRent.products) {
-        let occupied = await support.checkAvailability(item, newRent.start, newRent.end)
+        let occupied = await support.checkAvailability(
+            item,
+            newRent.start,
+            newRent.end
+        )
         // If some article is no more available notify the user
-        if(occupied){
-            return res.status(400).json({message: 'The products chosen are not available', error: {}})
+        if (occupied) {
+            return res
+                .status(400)
+                .json({
+                    message: 'The products chosen are not available',
+                    error: {},
+                })
         }
     }
-    let items = await Promise.all(newRent.products.map(async (item) => { return await Item.findById(item) }))
+    let items = await Promise.all(
+        newRent.products.map(async (item) => {
+            return await Item.findById(item)
+        })
+    )
     // Check if the price of the rent is changed from the initial showed to the user
-    if (support.computePrice(items, newRent.start, newRent.end) != newRent.price){
-        console.log(support.computePrice(items, newRent.start, newRent.end), newRent.price)
-        return res.status(408).json({ message: 'The price is changed', error: {} })
+    if (
+        support.computePrice(items, newRent.start, newRent.end) != newRent.price
+    ) {
+        console.log(
+            support.computePrice(items, newRent.start, newRent.end),
+            newRent.price
+        )
+        return res
+            .status(408)
+            .json({ message: 'The price is changed', error: {} })
     }
     newRent
         .save()
