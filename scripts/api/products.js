@@ -109,7 +109,7 @@ router.get(':/id/available', (req, res) => {
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Item.exists({ type: id })   
+    Item.exists({ type: id })
         .then((found) => {
             if (!found)
                 Product.findOneAndDelete({ _id: id })
@@ -230,6 +230,5 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
         }
     }
 })
-
 
 module.exports = router

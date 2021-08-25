@@ -46,9 +46,9 @@ const rentSchema = mongoose.Schema({
         },
     ],
 
-    price:{
+    price: {
         type: Number,
-        required: true
+        required: true,
     },
 
     start: {
