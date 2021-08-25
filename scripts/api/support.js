@@ -10,11 +10,11 @@ const Product = require('./models/product')
 const Rent = require('./models/rent')
 
 async function getAvailable(id, start, end) {
-    let items = await Item.find({ type: id })
+    let items = await Item.find({ type: id, condition: {$ne: 'not available'} })
     let freeItems = []
     for (let item of items) {
-        let occupied = await checkAvailability()
-        if (!occupied && item.condition !== 'not available') {
+        let occupied = await checkAvailability(item, start, end)
+        if (!occupied) {
             freeItems.push(item)
         }
     }

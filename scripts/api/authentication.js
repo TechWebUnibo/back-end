@@ -102,6 +102,24 @@ function verifyToken(req, res, next) {
         })
     }
 }
+/** 
+* Middleware used to check if a user is logged 
+* @summary If a user has a valid token add the token information to the request object
+*/
+
+function verifyLogin(req, res, next){
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    const publicKey = fs.readFileSync(
+        path.join(keysPath, 'jwtRS256.key.pub')
+    ) // get public key
+    if (token != null){
+        jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
+            if(!err) req.user = decoded
+        })
+    }
+    next()
+}
 
 /**
  * Authenticate a customer or a staff member. Generate a JWT token for later authorizations
@@ -153,3 +171,4 @@ router.post('/staff', (req, res) => {
 
 module.exports = router
 module.exports.verifyToken = verifyToken
+module.exports.verifyLogin = verifyLogin

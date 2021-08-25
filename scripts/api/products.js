@@ -170,7 +170,7 @@ router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
         })
 })
 
-router.get('/:id/available', async (req, res) => {
+router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     let id = req.params.id
     var start = req.query.start
     var end = req.query.end
@@ -178,32 +178,53 @@ router.get('/:id/available', async (req, res) => {
     if (!start || !end || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {
+
         const category = await Product.findOne({ _id: id })
         if (category) {
             let products =
                 category.products.length === 0 ? [id] : category.products
             let response = []
-            for (const product of products) {
-                let items = await support.getAvailable(product, start, end)
-                if (items.length > 0) {
+            if (!req.user) {
+                for (const product of products){
+                    let items = await Item.find({type: product, condition: {$ne: 'not available'}})
                     let chosen = items.reduce(
                         (chosen, item) =>
-                            item.price < chosen.price ? item : chosen,
+                            support.computePrice([item], start, end) < support.computePrice([chosen], start, end) ? item : chosen,
                         items[0]
                     )
                     response.push(chosen)
-                } else {
-                    res.status(200).json({ available: false })
-                    return
                 }
+                return res.status(200).json({
+                    products: response.map((item) => {
+                        return item['_id']
+                    }),
+                    price: support.computePrice(response, start, end),
+                })
             }
-            res.status(200).json({
-                available: true,
-                products: response.map((item) => {
-                    return item['_id']
-                }),
-                price: support.computePrice(response, start, end),
-            })
+            else{
+                for (const product of products) {
+                    let items = await support.getAvailable(product, start, end)
+                    console.log(items)
+                    if (items.length > 0) {
+                        let chosen = items.reduce(
+                            (chosen, item) =>
+                                support.computePrice([item], start, end) < support.computePrice([chosen], start, end) ? item : chosen,
+                            items[0]
+                        )
+                        response.push(chosen)
+                    } else {
+                        res.status(200).json({ available: false })
+                        return
+                    }
+                }
+                res.status(200).json({
+                    available: true,
+                    products: response.map((item) => {
+                        return item['_id']
+                    }),
+                    price: support.computePrice(response, start, end),
+                })
+            }
         } else {
             res.status(404).json({ message: 'Product not found', error: {} })
         }
