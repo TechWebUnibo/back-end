@@ -67,7 +67,6 @@ function computePrice(items, start, end) {
     return Math.floor(price)
 }
 
-
 exports.computePrice = computePrice
 exports.getAvailable = getAvailable
 exports.checkAvailability = checkAvailability

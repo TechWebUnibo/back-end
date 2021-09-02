@@ -13,7 +13,7 @@ const invoiceSchema = mongoose.Schema({
     rent: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: "Rentals"
+        ref: 'Rentals',
     },
 
     customer: {
@@ -43,7 +43,7 @@ const invoiceSchema = mongoose.Schema({
     products: {
         type: Map,
         of: String,
-        enum: ['perfect', 'good', 'suitable', 'broken', 'not available']
+        enum: ['perfect', 'good', 'suitable', 'broken', 'not available'],
     },
 
     price: {
@@ -68,10 +68,8 @@ const invoiceSchema = mongoose.Schema({
 
     notes: {
         type: String,
-        required: false
-    }
-
+        required: false,
+    },
 })
-
 
 module.exports = mongoose.model('Invoice', invoiceSchema)

@@ -66,11 +66,11 @@ const rentSchema = mongoose.Schema({
         },
     },
 
-    state:{
+    state: {
         type: String,
         required: true,
-        enum: ['not started','cancelled','in progress', 'terminated']
-    }
+        enum: ['not started', 'cancelled', 'in progress', 'terminated'],
+    },
 })
 
 // TODO - come tenere traccia del noleggio di un bundle?

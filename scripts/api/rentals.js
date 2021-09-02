@@ -126,35 +126,41 @@ router.delete('/:rentId', auth.verifyToken, (req, res) => {
         })
 })
 
-
-
 router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const id = req.params.id
     const rent = await Rent.findOne({ _id: id })
-    const damagedItem = 0.20
-    const brokenItem = 0.80
+    const damagedItem = 0.2
+    const brokenItem = 0.8
     // Penalities to be added to the price of the rent
-    let penalities = 0 
+    let penalities = 0
     console.log(rent)
-    if (rent && rent.state != 'terminated'){
+    if (rent && rent.state != 'terminated') {
         let products = []
         let returnItems = req.body.products
-        for(const item of rent.products){
+        for (const item of rent.products) {
             console.log(item)
             console.log(returnItems[item])
-            if(!returnItems[item]){
-                return res.status(400).json({ message: 'The items inserted does not match with the rentals one', error: {} })
+            if (!returnItems[item]) {
+                return res
+                    .status(400)
+                    .json({
+                        message:
+                            'The items inserted does not match with the rentals one',
+                        error: {},
+                    })
             }
         }
         for (const item of rent.products) {
-            let result = await Item.findOneAndUpdate({ _id: item }, { condition: returnItems[item]})
+            let result = await Item.findOneAndUpdate(
+                { _id: item },
+                { condition: returnItems[item] }
+            )
             // Apply an increase to the price if the items are returned in worse condition
             console.log(result)
-            if(result.condition != returnItems[item]){
+            if (result.condition != returnItems[item]) {
                 if (returnItems[item] == 'not available')
                     penalities = penalities + result.price * brokenItem
-                else
-                    penalities = penalities + result.price * damagedItem
+                else penalities = penalities + result.price * damagedItem
             }
         }
 
@@ -168,19 +174,15 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             start: rent.start,
             end: rent.end,
             products: returnItems,
-            notes: req.body.notes
-
+            notes: req.body.notes,
         })
 
         await invoice.save()
 
         return res.status(200).json(invoice)
-
-    }
-    else{
+    } else {
         return res.status(404).json({ message: 'Rent not found', error: {} })
     }
-
 })
 
 module.exports = router
