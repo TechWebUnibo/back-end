@@ -14,6 +14,7 @@ const path = require('path')
 const bcrypt = require('bcryptjs')
 const auth = require('./authentication')
 const fs = require('fs')
+const rent = require('./models/rent')
 
 var router = express.Router()
 

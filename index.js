@@ -15,6 +15,7 @@ const auth = require('./scripts/api/authentication')
 const items = require('./scripts/api/items')
 const products = require('./scripts/api/products')
 const rentals = require('./scripts/api/rentals')
+const invoices = require('./scripts/api/invoices')
 
 // Constants
 const mongoCredentials = {
@@ -45,6 +46,7 @@ app.use('/api/login/', auth)
 app.use('/api/items/', items)
 app.use('/api/products/', products)
 app.use('/api/rentals/', rentals)
+app.use('/api/invoices/', invoices)
 
 // Connect the database
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })

@@ -1,15 +1,21 @@
 /**
- * @file Rent schema
+ * @file Invoice schema
  * @author Antonio Lopez, Davide Cristoni, Gledis Gila
  */
 
 const mongoose = require('mongoose')
 const Customer = require('./customer')
 const Employee = require('./employee')
-const Product = require('./item')
 
-const rentSchema = mongoose.Schema({
+const invoiceSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+
+    rent: {
+        type: mongoose.Schema.Types.ObjectId,
+        required: true,
+        ref: "Rentals"
+    },
+
     customer: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Customer',
@@ -21,6 +27,7 @@ const rentSchema = mongoose.Schema({
             message: 'Invalid customer',
         },
     },
+
     employee: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Employee',
@@ -32,19 +39,12 @@ const rentSchema = mongoose.Schema({
             message: 'Invalid employee',
         },
     },
-    products: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Item',
-            required: true,
-            validate: {
-                validator: (id) => {
-                    return Product.exists({ _id: id })
-                },
-                message: 'Invalid product',
-            },
-        },
-    ],
+
+    products: {
+        type: Map,
+        of: String,
+        enum: ['perfect', 'good', 'suitable', 'broken', 'not available']
+    },
 
     price: {
         type: Number,
@@ -66,15 +66,12 @@ const rentSchema = mongoose.Schema({
         },
     },
 
-    state:{
+    notes: {
         type: String,
-        required: true,
-        enum: ['not started','cancelled','in progress', 'terminated']
+        required: false
     }
+
 })
 
-// TODO - come tenere traccia del noleggio di un bundle?
-// per i prodotti non c'e' problema si ricercano e si vedono se sono disponibili
-// non si saprebbe pero' se tali oggetti sono stati presi con un bundle o meno
 
-module.exports = mongoose.model('Rent', rentSchema)
+module.exports = mongoose.model('Invoice', invoiceSchema)

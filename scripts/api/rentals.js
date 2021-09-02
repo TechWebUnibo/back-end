@@ -9,8 +9,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Item = require('./models/item')
 const support = require('./support')
-const Customer = require('./models/customer')
-const Employee = require('./models/employee')
+const Invoice = require('./models/invoice')
 const Rent = require('./models/rent')
 
 const auth = require('./authentication')
@@ -125,6 +124,63 @@ router.delete('/:rentId', auth.verifyToken, (req, res) => {
                 error: err,
             })
         })
+})
+
+
+
+router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
+    const id = req.params.id
+    const rent = await Rent.findOne({ _id: id })
+    const damagedItem = 0.20
+    const brokenItem = 0.80
+    // Penalities to be added to the price of the rent
+    let penalities = 0 
+    console.log(rent)
+    if (rent && rent.state != 'terminated'){
+        let products = []
+        let returnItems = req.body.products
+        for(const item of rent.products){
+            console.log(item)
+            console.log(returnItems[item])
+            if(!returnItems[item]){
+                return res.status(400).json({ message: 'The items inserted does not match with the rentals one', error: {} })
+            }
+        }
+        for (const item of rent.products) {
+            let result = await Item.findOneAndUpdate({ _id: item }, { condition: returnItems[item]})
+            // Apply an increase to the price if the items are returned in worse condition
+            console.log(result)
+            if(result.condition != returnItems[item]){
+                if (returnItems[item] == 'not available')
+                    penalities = penalities + result.price * brokenItem
+                else
+                    penalities = penalities + result.price * damagedItem
+            }
+        }
+
+        await Rent.updateOne({ _id: id }, { state: 'terminated' })
+        let invoice = new Invoice({
+            _id: new mongoose.Types.ObjectId(),
+            customer: rent.customer,
+            employee: rent.employee,
+            rent: rent._id,
+            price: rent.price + penalities,
+            start: rent.start,
+            end: rent.end,
+            products: returnItems,
+            notes: req.body.notes
+
+        })
+
+        await invoice.save()
+
+        return res.status(200).json(invoice)
+
+    }
+    else{
+        return res.status(404).json({ message: 'Rent not found', error: {} })
+    }
+
 })
 
 module.exports = router
