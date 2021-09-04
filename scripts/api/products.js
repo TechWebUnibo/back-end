@@ -90,7 +90,6 @@ router.get('/', (req, res) => {
         })
 })
 
-
 /**
  * Delete the category with the corresponding id.
  * @param {object} res - Response object.

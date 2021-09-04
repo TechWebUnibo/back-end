@@ -139,22 +139,25 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
         // Check if the item inserted are the same of the rental
         for (const item of rent.products) {
             if (!returnItems[item]) {
-                return res
-                    .status(400)
-                    .json({
-                        message:
-                            'The items inserted does not match with the rentals one',
-                        error: {},
-                    })
+                return res.status(400).json({
+                    message:
+                        'The items inserted does not match with the rentals one',
+                    error: {},
+                })
             }
-            if ((!returnItems[item].condition || returnItems[item].condition === 'broken') && ((!returnItems[item].start || !returnItems[item].end) || Date.parse(returnItems[item].start) > Date.parse(returnItems[item].end))){
-                return res
-                    .status(400)
-                    .json({
-                        message:
-                            'Bad input parameter, if the item is broken also a period of reparation must be indicated',
-                        error: {},
-                    })
+            if (
+                (!returnItems[item].condition ||
+                    returnItems[item].condition === 'broken') &&
+                (!returnItems[item].start ||
+                    !returnItems[item].end ||
+                    Date.parse(returnItems[item].start) >
+                        Date.parse(returnItems[item].end))
+            ) {
+                return res.status(400).json({
+                    message:
+                        'Bad input parameter, if the item is broken also a period of reparation must be indicated',
+                    error: {},
+                })
             }
         }
         for (const item of rent.products) {
@@ -164,11 +167,14 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             )
             // Apply an increase to the price if the items are returned in worse condition
             if (result.condition != returnItems[item]) {
-                if (returnItems[item].condition == 'broken'){
+                if (returnItems[item].condition == 'broken') {
                     penalities = penalities + result.price * brokenItem
-                    await support.makeBroken(item, returnItems[item].start, returnItems[item].end)
-                }
-                else penalities = penalities + result.price * damagedItem
+                    await support.makeBroken(
+                        item,
+                        returnItems[item].start,
+                        returnItems[item].end
+                    )
+                } else penalities = penalities + result.price * damagedItem
             }
         }
 
@@ -189,7 +195,12 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
         return res.status(200).json(invoice)
     } else {
-        return res.status(404).json({ message: 'Rent not found or already terminated', error: {} })
+        return res
+            .status(404)
+            .json({
+                message: 'Rent not found or already terminated',
+                error: {},
+            })
     }
 })
 
