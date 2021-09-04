@@ -195,12 +195,10 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
         return res.status(200).json(invoice)
     } else {
-        return res
-            .status(404)
-            .json({
-                message: 'Rent not found or already terminated',
-                error: {},
-            })
+        return res.status(404).json({
+            message: 'Rent not found or already terminated',
+            error: {},
+        })
     }
 })
 
