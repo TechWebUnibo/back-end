@@ -52,6 +52,7 @@ router.post('/', auth.verifyToken, async (req, res) => {
             .status(408)
             .json({ message: 'The price is changed', error: {} })
     }
+    newRent.state = support.computeState(newRent.start, newRent.end)
     newRent
         .save()
         .then((result) => {
@@ -67,7 +68,6 @@ router.post('/', auth.verifyToken, async (req, res) => {
 
 router.get('/', auth.verifyToken, (req, res) => {
     const query = req.query
-    console.log(req.query)
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
 
@@ -133,13 +133,11 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const brokenItem = 0.8
     // Penalities to be added to the price of the rent
     let penalities = 0
-    console.log(rent)
     if (rent && rent.state != 'terminated') {
         let products = []
         let returnItems = req.body.products
+        // Check if the item inserted are the same of the rental
         for (const item of rent.products) {
-            console.log(item)
-            console.log(returnItems[item])
             if (!returnItems[item]) {
                 return res
                     .status(400)
@@ -149,17 +147,27 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                         error: {},
                     })
             }
+            if ((!returnItems[item].condition || returnItems[item].condition === 'broken') && ((!returnItems[item].start || !returnItems[item].end) || Date.parse(returnItems[item].start) > Date.parse(returnItems[item].end))){
+                return res
+                    .status(400)
+                    .json({
+                        message:
+                            'Bad input parameter, if the item is broken also a period of reparation must be indicated',
+                        error: {},
+                    })
+            }
         }
         for (const item of rent.products) {
             let result = await Item.findOneAndUpdate(
                 { _id: item },
-                { condition: returnItems[item] }
+                { condition: returnItems[item].condition }
             )
             // Apply an increase to the price if the items are returned in worse condition
-            console.log(result)
             if (result.condition != returnItems[item]) {
-                if (returnItems[item] == 'not available')
+                if (returnItems[item].condition == 'broken'){
                     penalities = penalities + result.price * brokenItem
+                    await support.makeBroken(item, returnItems[item].start, returnItems[item].end)
+                }
                 else penalities = penalities + result.price * damagedItem
             }
         }
@@ -181,7 +189,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
         return res.status(200).json(invoice)
     } else {
-        return res.status(404).json({ message: 'Rent not found', error: {} })
+        return res.status(404).json({ message: 'Rent not found or already terminated', error: {} })
     }
 })
 

@@ -42,8 +42,7 @@ const invoiceSchema = mongoose.Schema({
 
     products: {
         type: Map,
-        of: String,
-        enum: ['perfect', 'good', 'suitable', 'broken', 'not available'],
+        of: Object,
     },
 
     price: {

@@ -123,8 +123,7 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 router.post('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     let newData = req.body
-        ? path.join(productsPath, req.file.filename)
-        : newData.img
+
     Item.findOneAndUpdate(
         { _id: id },
         { $set: newData },

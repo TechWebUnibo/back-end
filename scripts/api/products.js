@@ -90,18 +90,6 @@ router.get('/', (req, res) => {
         })
 })
 
-router.get(':/id/available', (req, res) => {
-    const id = req.params.id
-    Item.find()
-        .distinct('type')
-        .exec()
-        .then((doc) => {
-            res.status(200).json(doc)
-        })
-        .catch((err) => {
-            res.status(500).json({ message: 'Internal error', error: err })
-        })
-})
 
 /**
  * Delete the category with the corresponding id.
@@ -179,27 +167,23 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     if (!start || !end || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {
+        // Check if the type of item exists
         const category = await Product.findOne({ _id: id })
         if (category) {
             let products =
                 category.products.length === 0 ? [id] : category.products
             let response = []
+            // Check if the user is logged
             if (!req.user) {
                 for (const product of products) {
                     let items = await Item.find({
                         type: product,
                         condition: { $ne: 'not available' },
                     })
-                    let chosen = items.reduce(
-                        (chosen, item) =>
-                            support.computePrice([item], start, end) <
-                            support.computePrice([chosen], start, end)
-                                ? item
-                                : chosen,
-                        items[0]
-                    )
+                    let chosen = support.getCheapest(items, start, end)
                     response.push(chosen)
                 }
+                // Provide only the price if the user is not logged
                 return res.status(200).json({
                     products: response.map((item) => {
                         return item['_id']
@@ -209,20 +193,11 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
             } else {
                 for (const product of products) {
                     let items = await support.getAvailable(product, start, end)
-                    console.log(items)
                     if (items.length > 0) {
-                        let chosen = items.reduce(
-                            (chosen, item) =>
-                                support.computePrice([item], start, end) <
-                                support.computePrice([chosen], start, end)
-                                    ? item
-                                    : chosen,
-                            items[0]
-                        )
+                        let chosen = support.getCheapest(items, start, end)
                         response.push(chosen)
                     } else {
-                        res.status(200).json({ available: false })
-                        return
+                        return res.status(200).json({ available: false })
                     }
                 }
                 res.status(200).json({
