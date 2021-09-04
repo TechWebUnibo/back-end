@@ -37,8 +37,8 @@ async function checkAvailability(item, start, end) {
     let occupied = await Rent.exists({
         products: item,
         $or: [
-            {state: {$ne:'cancelled'}},
-            {state: {$ne: 'terminated'}}
+            { state: { $ne: 'cancelled' } },
+            { state: { $ne: 'terminated' } },
         ],
         $or: [
             { start: { $gte: start, $lte: end } },
@@ -50,7 +50,7 @@ async function checkAvailability(item, start, end) {
         products: item,
         $or: [
             { state: { $ne: 'cancelled' } },
-            { state: { $ne: 'terminated' } }
+            { state: { $ne: 'terminated' } },
         ],
         $or: [
             { start: { $gte: start, $lte: end } },
@@ -61,18 +61,17 @@ async function checkAvailability(item, start, end) {
     return occupied || tmp
 }
 
-
 /**
  * Select the cheapest item of a category
  * @summary Price for the rent.
  * @param {Object} items - Items available
  * @return {Number} The cheapest item
  */
-function getCheapest(items, start, end){
+function getCheapest(items, start, end) {
     return items.reduce(
         (chosen, item) =>
             computePrice([item], start, end) <
-                computePrice([chosen], start, end)
+            computePrice([chosen], start, end)
                 ? item
                 : chosen,
         items[0]
@@ -88,7 +87,7 @@ function getCheapest(items, start, end){
  * @return {Number} Price of the rent
  */
 function computePrice(items, start, end) {
-    const conditions = { perfect: 0, good: 0.05, suitable: 0.1 , broken: 0}
+    const conditions = { perfect: 0, good: 0.05, suitable: 0.1, broken: 0 }
     const bundleDiscount = 0.1
     const renewTime = 86400000
 
@@ -104,26 +103,22 @@ function computePrice(items, start, end) {
     return Math.floor(price)
 }
 
-
 /**
  * Compute the state of a rent
- * @param {Date} start - Start of the rent 
+ * @param {Date} start - Start of the rent
  * @param {Date} end - End of the rent
- * @returns 
+ * @returns
  */
-function computeState(start, end){
+function computeState(start, end) {
     let state
-    if(Date.now() < Date.parse(start))
-        state = 'not started'
-    else if (Date.now() > Date.parse(start) && Date.now() < Date.parse(end)){
+    if (Date.now() < Date.parse(start)) state = 'not started'
+    else if (Date.now() > Date.parse(start) && Date.now() < Date.parse(end)) {
         state = 'in progress'
-    }
-    else{
+    } else {
         state = 'terminated'
     }
     return state
 }
-
 
 /**
  * Make a product unavailable for a given period.
@@ -134,13 +129,13 @@ function computeState(start, end){
  * @param {Date} price - Price of the reparation
  * @param {Date} employee - Employee that is making the product unavailable
  */
-async function makeBroken(item, start, end){
+async function makeBroken(item, start, end) {
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find({
         products: item,
         $or: [
             { state: { $ne: 'cancelled' } },
-            { state: { $ne: 'terminated' } }
+            { state: { $ne: 'terminated' } },
         ],
         $or: [
             { start: { $gt: start, $lte: end } },
@@ -149,18 +144,30 @@ async function makeBroken(item, start, end){
         ],
     })
     console.log(start, end, rentals, item)
-    let fullItem = await Item.findOneAndUpdate({_id: item}, {condition: 'broken'})
+    let fullItem = await Item.findOneAndUpdate(
+        { _id: item },
+        { condition: 'broken' }
+    )
 
-    for(const rent of rentals){
+    for (const rent of rentals) {
         let freeItems = await getAvailable(fullItem.type, start, end)
         console.log(freeItems)
         // If there are not replacement, the rental must be cancelled
-        if(freeItems.length === 0){
-            await Rent.findOneAndUpdate({_id: rent._id}, {state: 'cancelled'})
-        }
-        else{
+        if (freeItems.length === 0) {
+            await Rent.findOneAndUpdate(
+                { _id: rent._id },
+                { state: 'cancelled' }
+            )
+        } else {
             // If there is a replacement, the item is replaced
-            await Rent.findOneAndUpdate({ _id: rent._id, products: item}, { $set: {'products.$': getCheapest(freeItems, start, end)._id} })
+            await Rent.findOneAndUpdate(
+                { _id: rent._id, products: item },
+                {
+                    $set: {
+                        'products.$': getCheapest(freeItems, start, end)._id,
+                    },
+                }
+            )
         }
     }
 
@@ -169,7 +176,7 @@ async function makeBroken(item, start, end){
         start: start,
         end: end,
         products: [item],
-        state: computeState(start, end)
+        state: computeState(start, end),
     })
 
     await rent.save()
