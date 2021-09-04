@@ -23,11 +23,6 @@ jobs:
             git commit -am '[skip ci]'
             git push origin develop
       - run:
-          name: Build Docs
-          command: |
-            npm install
-            npm run doc
-      - run:
           name: Substitute testing uri
           command: |
             sed -i 's|mongodb://localhost:27017/NoloNoloPlus|mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority|' index.js
