@@ -126,21 +126,29 @@ router.delete('/:rentId', auth.verifyToken, (req, res) => {
         })
 })
 
-router.post('/:id/start', auth.verifyToken, async (req, res) =>{
+router.post('/:id/start', auth.verifyToken, async (req, res) => {
     const id = req.params.id
     const rent = await Rent.findOne({ _id: id })
-    if(rent){
+    if (rent) {
         // Check if is still possible to start the rent
-        if (rent.state === 'not started' && Date.parse(rent.start) <= Date.now() && Date.parse(support.addDays(rent.end, 1)) >= Date.now()){
-            const result = await Rent.findOneAndUpdate({_id: id}, {state: 'in progress'})
+        if (
+            rent.state === 'not started' &&
+            Date.parse(rent.start) <= Date.now() &&
+            Date.parse(support.addDays(rent.end, 1)) >= Date.now()
+        ) {
+            const result = await Rent.findOneAndUpdate(
+                { _id: id },
+                { state: 'in progress' }
+            )
             res.status(200).json(result)
+        } else {
+            res.status(400).json({
+                message: 'ent already in progress or terminated',
+                error: {},
+            })
         }
-        else{
-            res.status(400).json({ message: 'ent already in progress or terminated', error: {} })
-        }
-    }
-    else{
-        res.status(404).json({message: 'Rent not found', error: {}})
+    } else {
+        res.status(404).json({ message: 'Rent not found', error: {} })
     }
 })
 
@@ -186,12 +194,16 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             )
             // Apply an increase to the price if the items are returned in worse condition
             if (result.condition != returnItems[item]) {
-                if (returnItems[item].condition === 'broken' || returnItems[item].condition === 'not available') {
+                if (
+                    returnItems[item].condition === 'broken' ||
+                    returnItems[item].condition === 'not available'
+                ) {
                     penalities = penalities + result.price * brokenItem
                     await support.makeBroken(
                         item,
                         returnItems[item].condition,
-                        returnItems[item].start || new Date().setHours(0, 0, 0, 0),
+                        returnItems[item].start ||
+                            new Date().setHours(0, 0, 0, 0),
                         returnItems[item].end
                     )
                 } else penalities = penalities + result.price * damagedItem
@@ -215,12 +227,12 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
         return res.status(200).json(invoice)
     } else {
-        if(!rent)
+        if (!rent)
             return res.status(404).json({
                 message: 'Rent not found',
                 error: {},
             })
-        else{
+        else {
             return res.status(400).json({
                 message: 'Rent already terminated or never started',
                 error: {},

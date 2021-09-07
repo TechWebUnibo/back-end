@@ -11,11 +11,10 @@ const Rent = require('./models/rent')
 const Rep = require('./models/reparation')
 
 function addDays(date, days) {
-    var result = new Date(date);
-    result.setDate(result.getDate() + days);
-    return result.toISOString().split('T')[0];
+    var result = new Date(date)
+    result.setDate(result.getDate() + days)
+    return result.toISOString().split('T')[0]
 }
-
 
 async function getAvailable(id, start, end) {
     let items = await Item.find({
@@ -134,13 +133,12 @@ function computeState(start, end) {
  * item is available the rent is cancelled.
  * @param {*} item Item to be replaced
  * @param {*} condition Condition of the item
- * @param {*} start Start period 
+ * @param {*} start Start period
  * @param {*} end  End period
  */
-async function replaceItem(item, condition, start, end){
-
+async function replaceItem(item, condition, start, end) {
     let query = {}
-    if(end){
+    if (end) {
         query = {
             products: item,
             $or: [
@@ -153,18 +151,17 @@ async function replaceItem(item, condition, start, end){
                 { start: { $lte: start }, end: { $gte: end } },
             ],
         }
-    }
-    else{
+    } else {
         query = {
             products: item,
-                $or: [
-                    { state: { $ne: 'cancelled' } },
-                    { state: { $ne: 'terminated' } },
-                ],
-                start: { $gt: start } 
+            $or: [
+                { state: { $ne: 'cancelled' } },
+                { state: { $ne: 'terminated' } },
+            ],
+            start: { $gt: start },
         }
     }
-    
+
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find(query)
 
@@ -187,7 +184,11 @@ async function replaceItem(item, condition, start, end){
                 { _id: rent._id, products: item },
                 {
                     $set: {
-                        'products.$': getCheapest(freeItems, rent.start, rent.end)._id,
+                        'products.$': getCheapest(
+                            freeItems,
+                            rent.start,
+                            rent.end
+                        )._id,
                     },
                 }
             )
@@ -205,9 +206,8 @@ async function replaceItem(item, condition, start, end){
  * @param {Date} employee - Employee that is making the product unavailable
  */
 async function makeBroken(item, condition, start, end) {
-  
     replaceItem(item, condition, start, end)
-    if(end){
+    if (end) {
         let rep = new Rep({
             _id: new mongoose.Types.ObjectId(),
             start: start,

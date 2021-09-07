@@ -13,7 +13,6 @@ const auth = require('./authentication')
 
 var router = express.Router()
 
-
 // Get all the reparation filtered by query parameters
 router.get('/', auth.verifyToken, (req, res) => {
     const query = req.query
@@ -26,7 +25,6 @@ router.get('/', auth.verifyToken, (req, res) => {
             res.status(500).json({ message: 'Server error', error: err })
         })
 })
-
 
 router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const id = req.params.id
@@ -45,8 +43,8 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                 })
             }
             if (
-                (!returnItems[item].condition ||
-                    returnItems[item].condition === 'broken')
+                !returnItems[item].condition ||
+                returnItems[item].condition === 'broken'
             ) {
                 return res.status(400).json({
                     message:
@@ -58,9 +56,9 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
         for (const item of rep.products) {
             let result = await Item.findOneAndUpdate(
                 { _id: item },
-                { condition: returnItems[item].condition }
-            ,
-            { useFindAndModify: false })
+                { condition: returnItems[item].condition },
+                { useFindAndModify: false }
+            )
         }
 
         await Rep.updateOne({ _id: id }, { state: 'terminated' })
