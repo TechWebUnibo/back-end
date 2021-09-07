@@ -115,11 +115,11 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
         : undefined
     newData.avatar = req.file
         ? path.join(avatarPath, req.file.filename)
-        : undefinded
+        : undefined
     Customer.findOneAndUpdate(
         { _id: id },
         { $set: newData },
-        { runValidators: true, new: false, useFindAndModify: false }
+        { new: false, useFindAndModify: false }
     )
         .exec()
         .then((result) => {
