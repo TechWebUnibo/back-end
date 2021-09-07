@@ -131,12 +131,12 @@ router.post('/:id/start', auth.verifyToken, async (req, res) =>{
     const rent = await Rent.findOne({ _id: id })
     if(rent){
         // Check if is still possible to start the rent
-        if (rent.state === 'not started' && Date.parse(rent.start) <= Date.now() && Date.parse(rent.end) >= Date.now()){
+        if (rent.state === 'not started' && Date.parse(rent.start) <= Date.now() && Date.parse(support.addDays(rent.end, 1)) >= Date.now()){
             const result = await Rent.findOneAndUpdate({_id: id}, {state: 'in progress'})
             res.status(200).json(result)
         }
         else{
-            res.status(400).json({ message: 'Rent already in progress or terminated', error: {} })
+            res.status(400).json({ message: 'ent already in progress or terminated', error: {} })
         }
     }
     else{
@@ -151,7 +151,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const brokenItem = 0.8
     // Penalities to be added to the price of the rent
     let penalities = 0
-    if (rent && rent.state != 'terminated') {
+    if (rent && rent.state === 'in progress') {
         let products = []
         let returnItems = req.body.products
         // Check if the item inserted are the same of the rental
@@ -173,7 +173,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             ) {
                 return res.status(400).json({
                     message:
-                        'Bad input parameter, if the item is broken also a period of reparation must be indicated',
+                        'Bad input parameter, if the item is broken a period of reparation must be also indicated',
                     error: {},
                 })
             }
@@ -215,10 +215,17 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
         return res.status(200).json(invoice)
     } else {
-        return res.status(404).json({
-            message: 'Rent not found or already terminated',
-            error: {},
-        })
+        if(!rent)
+            return res.status(404).json({
+                message: 'Rent not found',
+                error: {},
+            })
+        else{
+            return res.status(400).json({
+                message: 'Rent already terminated or never started',
+                error: {},
+            })
+        }
     }
 })
 

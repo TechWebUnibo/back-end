@@ -10,6 +10,13 @@ const Product = require('./models/product')
 const Rent = require('./models/rent')
 const Rep = require('./models/reparation')
 
+function addDays(date, days) {
+    var result = new Date(date);
+    result.setDate(result.getDate() + days);
+    return result.toISOString().split('T')[0];
+}
+
+
 async function getAvailable(id, start, end) {
     let items = await Item.find({
         type: id,
@@ -168,7 +175,6 @@ async function replaceItem(item, condition, start, end){
 
     for (const rent of rentals) {
         let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
-        console.log(freeItems)
         // If there are not replacement, the rental must be cancelled
         if (freeItems.length === 0) {
             await Rent.findOneAndUpdate(
@@ -200,7 +206,6 @@ async function replaceItem(item, condition, start, end){
  */
 async function makeBroken(item, condition, start, end) {
   
-    console.log(start, end)
     replaceItem(item, condition, start, end)
     if(end){
         let rep = new Rep({
@@ -208,6 +213,7 @@ async function makeBroken(item, condition, start, end) {
             start: start,
             end: end,
             products: [item],
+            // TODO - ha senso che le riparazioni abbiano uno stato?
             state: computeState(start, end),
         })
 
@@ -222,3 +228,4 @@ exports.getCheapest = getCheapest
 exports.makeBroken = makeBroken
 exports.computeState = computeState
 exports.replaceItem = replaceItem
+exports.addDays = addDays
