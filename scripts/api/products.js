@@ -170,7 +170,8 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
         const category = await Product.findOne({ _id: id })
         if (category) {
             let products =
-                category.products.length === 0 ? [id] : category.products
+                category.products.length === 0 ? 
+                [id] : category.products
             let response = []
             // Check if the user is logged
             if (!req.user) {
