@@ -68,6 +68,7 @@ async function checkAvailability(item, start, end) {
  * @return {Number} The cheapest item
  */
 function getCheapest(items, start, end) {
+    console.log(items)
     return items.reduce(
         (chosen, item) =>
             computePrice([item], start, end) <
@@ -96,6 +97,7 @@ function computePrice(items, start, end) {
         Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
     let price = 0
     for (let item of items) {
+        console.log(item)
         price = price + item.price - item.price * conditions[item.condition]
     }
     price = price * days
@@ -121,36 +123,51 @@ function computeState(start, end) {
 }
 
 /**
- * Make a product unavailable for a given period.
- * @summary Make an item unavailable.
- * @param {Object} item - Items unavailabke.
- * @param {Date} start - Start of the period
- * @param {Date} end - End of the period
- * @param {Date} price - Price of the reparation
- * @param {Date} employee - Employee that is making the product unavailable
+ * Replace the current item for all the rentals in the given period. If no
+ * item is available the rent is cancelled.
+ * @param {*} item Item to be replaced
+ * @param {*} condition Condition of the item
+ * @param {*} start Start period 
+ * @param {*} end  End period
  */
-async function makeBroken(item, start, end) {
+async function replaceItem(item, condition, start, end){
+
+    let query = {}
+    if(end){
+        query = {
+            products: item,
+            $or: [
+                { state: { $ne: 'cancelled' } },
+                { state: { $ne: 'terminated' } },
+            ],
+            $or: [
+                { start: { $gt: start, $lte: end } },
+                { end: { $gt: start, $lt: end } },
+                { start: { $lte: start }, end: { $gte: end } },
+            ],
+        }
+    }
+    else{
+        query = {
+            products: item,
+                $or: [
+                    { state: { $ne: 'cancelled' } },
+                    { state: { $ne: 'terminated' } },
+                ],
+                start: { $gt: start } 
+        }
+    }
+    
     // Search for all the rentals that use that item in the given period
-    let rentals = await Rent.find({
-        products: item,
-        $or: [
-            { state: { $ne: 'cancelled' } },
-            { state: { $ne: 'terminated' } },
-        ],
-        $or: [
-            { start: { $gt: start, $lte: end } },
-            { end: { $gt: start, $lt: end } },
-            { start: { $lte: start }, end: { $gte: end } },
-        ],
-    })
-    console.log(start, end, rentals, item)
+    let rentals = await Rent.find(query)
+
     let fullItem = await Item.findOneAndUpdate(
         { _id: item },
-        { condition: 'broken' }
+        { condition: condition }
     )
 
     for (const rent of rentals) {
-        let freeItems = await getAvailable(fullItem.type, start, end)
+        let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
         console.log(freeItems)
         // If there are not replacement, the rental must be cancelled
         if (freeItems.length === 0) {
@@ -164,22 +181,38 @@ async function makeBroken(item, start, end) {
                 { _id: rent._id, products: item },
                 {
                     $set: {
-                        'products.$': getCheapest(freeItems, start, end)._id,
+                        'products.$': getCheapest(freeItems, rent.start, rent.end)._id,
                     },
                 }
             )
         }
     }
+}
 
-    let rent = new Rep({
-        _id: new mongoose.Types.ObjectId(),
-        start: start,
-        end: end,
-        products: [item],
-        state: computeState(start, end),
-    })
+/**
+ * Make a product unavailable for a given period.
+ * @summary Make an item unavailable.
+ * @param {Object} item - Items unavailabke.
+ * @param {Date} start - Start of the period
+ * @param {Date} end - End of the period
+ * @param {Date} price - Price of the reparation
+ * @param {Date} employee - Employee that is making the product unavailable
+ */
+async function makeBroken(item, condition, start, end) {
+  
+    console.log(start, end)
+    replaceItem(item, condition, start, end)
+    if(end){
+        let rep = new Rep({
+            _id: new mongoose.Types.ObjectId(),
+            start: start,
+            end: end,
+            products: [item],
+            state: computeState(start, end),
+        })
 
-    await rent.save()
+        await rep.save()
+    }
 }
 
 exports.computePrice = computePrice
@@ -188,3 +221,4 @@ exports.checkAvailability = checkAvailability
 exports.getCheapest = getCheapest
 exports.makeBroken = makeBroken
 exports.computeState = computeState
+exports.replaceItem = replaceItem

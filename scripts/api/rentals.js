@@ -52,7 +52,7 @@ router.post('/', auth.verifyToken, async (req, res) => {
             .status(408)
             .json({ message: 'The price is changed', error: {} })
     }
-    newRent.state = support.computeState(newRent.start, newRent.end)
+    newRent.state = 'not started'
     newRent
         .save()
         .then((result) => {
@@ -126,6 +126,24 @@ router.delete('/:rentId', auth.verifyToken, (req, res) => {
         })
 })
 
+router.post('/:id/start', auth.verifyToken, async (req, res) =>{
+    const id = req.params.id
+    const rent = await Rent.findOne({ _id: id })
+    if(rent){
+        // Check if is still possible to start the rent
+        if (rent.state === 'not started' && Date.parse(rent.start) <= Date.now() && Date.parse(rent.end) >= Date.now()){
+            const result = await Rent.findOneAndUpdate({_id: id}, {state: 'in progress'})
+            res.status(200).json(result)
+        }
+        else{
+            res.status(400).json({ message: 'Rent already in progress or terminated', error: {} })
+        }
+    }
+    else{
+        res.status(404).json({message: 'Rent not found', error: {}})
+    }
+})
+
 router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const id = req.params.id
     const rent = await Rent.findOne({ _id: id })
@@ -163,15 +181,17 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
         for (const item of rent.products) {
             let result = await Item.findOneAndUpdate(
                 { _id: item },
-                { condition: returnItems[item].condition }
+                { condition: returnItems[item].condition },
+                { useFindAndModify: false }
             )
             // Apply an increase to the price if the items are returned in worse condition
             if (result.condition != returnItems[item]) {
-                if (returnItems[item].condition == 'broken') {
+                if (returnItems[item].condition === 'broken' || returnItems[item].condition === 'not available') {
                     penalities = penalities + result.price * brokenItem
                     await support.makeBroken(
                         item,
-                        returnItems[item].start,
+                        returnItems[item].condition,
+                        returnItems[item].start || new Date().setHours(0, 0, 0, 0),
                         returnItems[item].end
                     )
                 } else penalities = penalities + result.price * damagedItem
