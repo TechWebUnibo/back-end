@@ -57,8 +57,8 @@ export const getProducts = async () =>{
     return res.body
 }
 
-export const getAvailable = async (id, start, end, token) =>{
-    const res = await request.get(`products/${id}/available?start=${start}&end=${end}`).set('Authorization', `Bearer ${token}`).send()
+export const getAvailable = async (id, start, end, token, rent) =>{
+    const res = await request.get(`products/${id}/available?start=${start}&end=${end}${rent ? '&rent='+rent : ''}`).set('Authorization', `Bearer ${token}`).send()
     return res.body
 }
 
@@ -83,7 +83,28 @@ export const createRent = async (start, end, token) =>{
     return res.body.rent
 }
 
+export const searchRent = async (id, token) =>{
+    const res = await request.get(`rentals/${id}`).set('Authorization', `Bearer ${token}`).send()
+    return res.body
+}
+
 export const deleteRent = async (id, token) =>{
     const res = await request.delete(`rentals/${id}`).set('Authorization', `Bearer ${token}`).send()
+    return res.body
+}
+
+export const createItem = async (id, token) => {
+    const data = {
+        name: `Generic Item-${Math.floor(Math.random() * 999)}`,
+        price: 20,
+        type: id,
+        condition: 'perfect',
+    }
+    const res = await request.post(`items/`).set('Authorization', `Bearer ${token}`).send(data)
+    return res.body.item
+}
+
+export const deleteItem = async (id, token) => {
+    const res = await request.delete(`items/${id}`).set('Authorization', `Bearer ${token}`).send()
     return res.body
 }
