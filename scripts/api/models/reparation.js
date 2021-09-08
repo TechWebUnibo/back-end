@@ -37,12 +37,6 @@ const reparationSchema = mongoose.Schema({
             message: 'Start should be before the end of the rent',
         },
     },
-
-    state: {
-        type: String,
-        required: true,
-        enum: ['not started', 'cancelled', 'in progress', 'terminated'],
-    },
 })
 
 // TODO - come tenere traccia del noleggio di un bundle?

@@ -8,6 +8,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Item = require('./models/item')
 const Rent = require('./models/rent')
+const support = require('./support')
 const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
@@ -29,7 +30,7 @@ router.post('/', auth.verifyToken, (req, res) => {
         .then((result) => {
             res.status(200).json({
                 message: 'Item created',
-                product: newProduct,
+                item: newProduct,
             })
         })
         .catch((err) => {
@@ -120,31 +121,32 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 })
 
 // Modify an item
-router.post('/:id', auth.verifyToken, (req, res) => {
+router.post('/:id', auth.verifyToken, async (req, res) => {
     const id = req.params.id
     let newData = req.body
-
-    Item.findOneAndUpdate(
-        { _id: id },
-        { $set: newData },
-        { runValidators: true, new: false, useFindAndModify: false }
-    )
-        .exec()
-        .then((result) => {
-            if (result) {
-                res.status(200).json({
-                    message: 'Data modified',
-                    product: result,
-                })
-            } else
-                res.status(404).json({
-                    message: 'Item not found',
-                    product: result,
-                })
+    let item = await Item.find({ _id: id })
+    if (item){
+        if(newData.condition && newData.condition === 'not available'){
+            let start = new Date()
+            start.setHours(0,0,0,0)
+            support.makeBroken([id], newData.condition, start.toISOString())
+        }
+        else if (newData.condition && newData.condition === 'broken'){
+            return res.status(400).json({message: 'For a broken object use the api for create a reparation', error: {}})
+        }
+        result = await Item.findOneAndUpdate(
+            { _id: id },
+            { $set: newData },
+            { runValidators: true, useFindAndModify: false }
+        )
+        res.status(200).json({
+            message: 'Data modified',
+            product: result,
         })
-        .catch((err) => {
-            res.status(400).json({ message: 'Bad input parameter', error: err })
-        })
+    }
+    else{
+        res.status(400).json({ message: 'Bad input parameter', error: {} })
+    }
 })
 
 module.exports = router

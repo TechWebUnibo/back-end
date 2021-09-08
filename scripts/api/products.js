@@ -160,8 +160,11 @@ router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
 
 router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     let id = req.params.id
-    var start = req.query.start
-    var end = req.query.end
+    let start = req.query.start
+    let end = req.query.end
+    let rent = req.query.rent
+
+    console.log({ rent: rent})
 
     if (!start || !end || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
@@ -191,7 +194,7 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
                 })
             } else {
                 for (const product of products) {
-                    let items = await support.getAvailable(product, start, end)
+                    let items = await support.getAvailable(product, start, end, rent)
                     if (items.length > 0) {
                         let chosen = support.getCheapest(items, start, end)
                         response.push(chosen)

@@ -21,20 +21,14 @@ router.post('/', auth.verifyToken, async (req, res) => {
     data._id = new mongoose.Types.ObjectId()
     newRent = new Rent(data)
     // Check the consistancy of the price and the real availability of the products
-    for (let item of newRent.products) {
-        let occupied = await support.checkAvailability(
-            item,
-            newRent.start,
-            newRent.end
-        )
-        // If some article is no more available notify the user
-        if (occupied) {
-            return res.status(400).json({
-                message: 'The products chosen are not available',
-                error: {},
-            })
-        }
+    // Check if the items are available
+    if (await support.checkItems(newRent.products, newRent.start, newRent.end)) {
+        return res.status(400).json({
+            message: 'The products chosen are not available',
+            error: {},
+        })
     }
+
     let items = await Promise.all(
         newRent.products.map(async (item) => {
             return await Item.findById(item)
@@ -84,21 +78,67 @@ router.get('/', auth.verifyToken, (req, res) => {
         })
 })
 
-router.post('/:rentId', auth.verifyToken, (req, res) => {
+router.get('/:rentId', auth.verifyToken, async (req, res) => {
     const rentId = req.params.rentId
-    const newData = req.body
-    Rent.findOneAndUpdate({ _id: rentId }, { $set: newData })
-        .exec()
-        .then((result) => {
-            if (result) {
-                res.status(200).json(result).json(result)
-            } else {
-                res.status(404).json({ message: 'Rent not found', error: {} })
+    let rent = await Rent.findById(rentId, )
+    if(rent)
+        return res.status(200).json(rent)
+    else
+        return res.status(404).json({message: 'Rent not found', error: {}})
+})
+
+router.post('/:rentId', auth.verifyToken, async (req, res) => {
+    const rentId = req.params.rentId
+    const newData= req.body
+
+    let rent = await Rent.findById(rentId) 
+
+    if(rent){
+        newData.start = newData.start ? newData.start : rent.start
+        newData.end = newData.end ? newData.end : rent.end
+        newData.products = newData.products && newData.products.length > 0 ? newData.products : rent.products
+        newData.price = newData.price ? newData.price : rent.price
+        // If the rent is already in progress keep the state otherwise is not started
+        newData.state = rent.state 
+        
+        // Check if the items are available
+        if (await support.checkItems(newData.products, newData.start, newData.end, rent._id)) {
+                return res.status(400).json({
+                    message: 'The products chosen are not available',
+                    error: {},
+                })
             }
-        })
-        .catch((err) => {
-            res.status(400).json({ message: 'Bad input parameter', error: err })
-        })
+        let items = await Promise.all(
+            newData.products.map(async (item) => {
+                return await Item.findById(item)
+            })
+        )
+        // Check if the price of the rent is changed from the initial showed to the user
+        if (support.computePrice(items, newData.start, newData.end) != newData.price) {
+            console.log(
+                support.computePrice(items, newData.start, newData.end),
+                newData.price
+            )
+            return res
+                .status(408)
+                .json({ message: 'The price is changed', error: {} })
+        }
+        
+        Rent.findOneAndUpdate({_id: rentId}, newData, {new: true, useFindAndModify: true})
+        .then((result) => {
+                res.status(200).json({
+                    rent: result,
+                    message: 'Rent modified',
+                })
+            })
+            .catch((err) => {
+                res.status(400).json({ message: 'Bad input parameter', error: err })
+            })
+    }
+    else{
+        return res.status(400).json({message: 'Rent not found', error: {}})
+    }
+    
 })
 
 router.delete('/:rentId', auth.verifyToken, (req, res) => {
@@ -142,8 +182,9 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
             )
             res.status(200).json(result)
         } else {
+            console.log(Date.parse(rent.start), Date.now(), support.addDays(rent.end, 1))
             res.status(400).json({
-                message: 'ent already in progress or terminated',
+                message: 'Rent already in progress or terminated',
                 error: {},
             })
         }
@@ -197,10 +238,11 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                 if (
                     returnItems[item].condition === 'broken' ||
                     returnItems[item].condition === 'not available'
-                ) {
+                ) 
+                {
                     penalities = penalities + result.price * brokenItem
                     await support.makeBroken(
-                        item,
+                        [item],
                         returnItems[item].condition,
                         returnItems[item].start ||
                             new Date().setHours(0, 0, 0, 0),

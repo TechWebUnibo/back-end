@@ -16,14 +16,14 @@ function addDays(date, days) {
     return result.toISOString().split('T')[0]
 }
 
-async function getAvailable(id, start, end) {
+async function getAvailable(id, start, end, rent) {
     let items = await Item.find({
         type: id,
         condition: { $ne: 'not available' },
     })
     let freeItems = []
     for (let item of items) {
-        let occupied = await checkAvailability(item._id, start, end)
+        let occupied = await checkAvailability(item._id, start, end, rent)
         if (!occupied) {
             freeItems.push(item)
         }
@@ -32,15 +32,40 @@ async function getAvailable(id, start, end) {
 }
 
 /**
- * Check if a item is available in the given date.
+ * Check if a list items is available in the given date.
  * @summary Check if an item is available.
  * @param {Array} items - Item to be checked
  * @param {Date} start - Start date
  * @param {Date} end - End date
+ * @param {String} rent - Rent to exclude in the research
  * @return {Boolean} Brief description of the returning value here.
  */
-async function checkAvailability(item, start, end) {
-    let occupied = await Rent.exists({
+async function checkItems(items, start, end, rent){
+    for (let item of items) {
+        let occupied = await checkAvailability(
+            item,
+            start,
+            end,
+            rent
+        )
+        // If some article is no more available notify the user
+        if (occupied)
+            return true
+    }
+    return false
+}
+
+/**
+ * Check if a item is available in the given date.
+ * @summary Check if an item is available.
+ * @param {Array} item - Item to be checked
+ * @param {Date} start - Start date
+ * @param {Date} end - End date
+ * @param {String} rent - Rent to exclude in the research
+ * @return {Boolean} Brief description of the returning value here.
+ */
+async function checkAvailability(item, start, end, rent) {
+    let query = {
         products: item,
         $or: [
             { state: { $ne: 'cancelled' } },
@@ -51,7 +76,10 @@ async function checkAvailability(item, start, end) {
             { end: { $gte: start, $lte: end } },
             { start: { $lte: start }, end: { $gte: end } },
         ],
-    })
+    }
+    if(rent)
+        query._id = { $ne: rent }
+    let occupied = await Rent.exists(query)
     let tmp = await Rep.exists({
         products: item,
         $or: [
@@ -74,7 +102,6 @@ async function checkAvailability(item, start, end) {
  * @return {Number} The cheapest item
  */
 function getCheapest(items, start, end) {
-    console.log(items)
     return items.reduce(
         (chosen, item) =>
             computePrice([item], start, end) <
@@ -103,7 +130,6 @@ function computePrice(items, start, end) {
         Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
     let price = 0
     for (let item of items) {
-        console.log(item)
         price = price + item.price - item.price * conditions[item.condition]
     }
     price = price * days
@@ -146,8 +172,8 @@ async function replaceItem(item, condition, start, end) {
                 { state: { $ne: 'terminated' } },
             ],
             $or: [
-                { start: { $gt: start, $lte: end } },
-                { end: { $gt: start, $lt: end } },
+                { start: { $gte: start, $lte: end } },
+                { end: { $gte: start, $lte: end } },
                 { start: { $lte: start }, end: { $gte: end } },
             ],
         }
@@ -158,30 +184,36 @@ async function replaceItem(item, condition, start, end) {
                 { state: { $ne: 'cancelled' } },
                 { state: { $ne: 'terminated' } },
             ],
-            start: { $gt: start },
+            start: { $gte: start },
         }
     }
 
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find(query)
+    console.log(rentals, item, start, end, condition)
 
     let fullItem = await Item.findOneAndUpdate(
         { _id: item },
         { condition: condition }
     )
 
+        console.log(fullItem)
+
     for (const rent of rentals) {
         let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
         // If there are not replacement, the rental must be cancelled
         if (freeItems.length === 0) {
+            
             await Rent.findOneAndUpdate(
                 { _id: rent._id },
-                { state: 'cancelled' }
+                { state: 'cancelled' },
+                {useFindAndModify: true}
             )
         } else {
             // If there is a replacement, the item is replaced
-            await Rent.findOneAndUpdate(
-                { _id: rent._id, products: item },
+            console.log(rent._id)
+            Rent.updateOne(
+                { _id: rent._id, products: item},
                 {
                     $set: {
                         'products.$': getCheapest(
@@ -190,9 +222,10 @@ async function replaceItem(item, condition, start, end) {
                             rent.end
                         )._id,
                     },
-                }
-            )
-        }
+                } )
+                .exec()
+                .then((result)=> console.log(result))
+            }
     }
 }
 
@@ -205,16 +238,15 @@ async function replaceItem(item, condition, start, end) {
  * @param {Date} price - Price of the reparation
  * @param {Date} employee - Employee that is making the product unavailable
  */
-async function makeBroken(item, condition, start, end) {
-    replaceItem(item, condition, start, end)
+async function makeBroken(items, condition, start, end) {
+    for(const item of items)
+        await replaceItem(item, condition, start, end)
     if (end) {
         let rep = new Rep({
             _id: new mongoose.Types.ObjectId(),
             start: start,
             end: end,
-            products: [item],
-            // TODO - ha senso che le riparazioni abbiano uno stato?
-            state: computeState(start, end),
+            products: items,
         })
 
         await rep.save()
@@ -224,6 +256,7 @@ async function makeBroken(item, condition, start, end) {
 exports.computePrice = computePrice
 exports.getAvailable = getAvailable
 exports.checkAvailability = checkAvailability
+exports.checkItems = checkItems
 exports.getCheapest = getCheapest
 exports.makeBroken = makeBroken
 exports.computeState = computeState
