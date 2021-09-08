@@ -33,7 +33,7 @@ router.post('/', auth.verifyToken, async (req, res) => {
     try {
         rep = await makeBroken(data.products, 'broken', data.start, data.end)
     } catch (error) {
-        return res.status(500).json({message: 'Server error', error: error})
+        return res.status(500).json({ message: 'Server error', error: error })
     }
     return res.status(200).json(rep)
 })

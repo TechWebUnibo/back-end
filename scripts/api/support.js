@@ -40,17 +40,11 @@ async function getAvailable(id, start, end, rent) {
  * @param {String} rent - Rent to exclude in the research
  * @return {Boolean} Brief description of the returning value here.
  */
-async function checkItems(items, start, end, rent){
+async function checkItems(items, start, end, rent) {
     for (let item of items) {
-        let occupied = await checkAvailability(
-            item,
-            start,
-            end,
-            rent
-        )
+        let occupied = await checkAvailability(item, start, end, rent)
         // If some article is no more available notify the user
-        if (occupied)
-            return true
+        if (occupied) return true
     }
     return false
 }
@@ -77,8 +71,7 @@ async function checkAvailability(item, start, end, rent) {
             { start: { $lte: start }, end: { $gte: end } },
         ],
     }
-    if(rent)
-        query._id = { $ne: rent }
+    if (rent) query._id = { $ne: rent }
     let occupied = await Rent.exists(query)
     let tmp = await Rep.exists({
         products: item,
@@ -197,23 +190,22 @@ async function replaceItem(item, condition, start, end) {
         { condition: condition }
     )
 
-        console.log(fullItem)
+    console.log(fullItem)
 
     for (const rent of rentals) {
         let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
         // If there are not replacement, the rental must be cancelled
         if (freeItems.length === 0) {
-            
             await Rent.findOneAndUpdate(
                 { _id: rent._id },
                 { state: 'cancelled' },
-                {useFindAndModify: true}
+                { useFindAndModify: true }
             )
         } else {
             // If there is a replacement, the item is replaced
             console.log(rent._id)
             Rent.updateOne(
-                { _id: rent._id, products: item},
+                { _id: rent._id, products: item },
                 {
                     $set: {
                         'products.$': getCheapest(
@@ -222,10 +214,11 @@ async function replaceItem(item, condition, start, end) {
                             rent.end
                         )._id,
                     },
-                } )
+                }
+            )
                 .exec()
-                .then((result)=> console.log(result))
-            }
+                .then((result) => console.log(result))
+        }
     }
 }
 
@@ -239,8 +232,7 @@ async function replaceItem(item, condition, start, end) {
  * @param {Date} employee - Employee that is making the product unavailable
  */
 async function makeBroken(items, condition, start, end) {
-    for(const item of items)
-        await replaceItem(item, condition, start, end)
+    for (const item of items) await replaceItem(item, condition, start, end)
     if (end) {
         let rep = new Rep({
             _id: new mongoose.Types.ObjectId(),
