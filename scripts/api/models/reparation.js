@@ -40,8 +40,8 @@ const reparationSchema = mongoose.Schema({
 
     terminated: {
         type: Boolean,
-        default: false
-    }
+        default: false,
+    },
 })
 
 // TODO - come tenere traccia del noleggio di un bundle?

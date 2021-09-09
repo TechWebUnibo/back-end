@@ -19,9 +19,7 @@ const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const Rep = require('./scripts/api/models/reparation')
 const Item = require('./scripts/api/models/item')
-var cron = require('node-cron');
-
-
+var cron = require('node-cron')
 
 // Constants
 const mongoCredentials = {
@@ -62,20 +60,19 @@ db.once('open', function () {
     console.log('Connected to Mongo!')
 })
 
-
 // The schedule time must be changed for real use
 cron.schedule('*/5 * * * * *', async () => {
     console.log('Checking reparations...')
     let today = new Date()
-    let reps = await Rep.find({ end: { $lte: today }, terminated: false})
-    for(const rep of reps){
-        for(const item of rep.products){
-            await Item.updateOne({_id: item}, {condition: 'perfect'})
+    let reps = await Rep.find({ end: { $lte: today }, terminated: false })
+    for (const rep of reps) {
+        for (const item of rep.products) {
+            await Item.updateOne({ _id: item }, { condition: 'perfect' })
         }
-        await Rep.updateOne({ _id: rep._id }, { terminated: true})
+        await Rep.updateOne({ _id: rep._id }, { terminated: true })
     }
     console.log('Check end...')
-});
+})
 
 app.listen(port, () => {
     console.log('Server is listening...')
