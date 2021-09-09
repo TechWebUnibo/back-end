@@ -9,6 +9,7 @@ public
 
 script.sh
 
+mochawesome-report
 
 #Ignore keys for authentication
 *.key*

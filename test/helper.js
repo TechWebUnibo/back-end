@@ -93,6 +93,11 @@ export const deleteRent = async (id, token) =>{
     return res.body
 }
 
+export const createGenericItem = async (token) => {
+    const products = await getProducts()
+    return await createItem(products[0]._id, token)
+}
+
 export const createItem = async (id, token) => {
     const data = {
         name: `Generic Item-${Math.floor(Math.random() * 999)}`,
@@ -104,7 +109,17 @@ export const createItem = async (id, token) => {
     return res.body.item
 }
 
+export const modifyItem = async (id, data, token) => {
+    const res = await request.post(`items/${id}`).set('Authorization', `Bearer ${token}`).send(data)
+    return res.body.item
+}
+
 export const deleteItem = async (id, token) => {
     const res = await request.delete(`items/${id}`).set('Authorization', `Bearer ${token}`).send()
+    return res.body
+}
+
+export const getReparations = async (id, token) => {
+    const res = await request.get(`reparations/?products=${id}`).set('Authorization', `Bearer ${token}`).send()
     return res.body
 }

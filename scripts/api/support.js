@@ -183,14 +183,11 @@ async function replaceItem(item, condition, start, end) {
 
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find(query)
-    console.log(rentals, item, start, end, condition)
 
     let fullItem = await Item.findOneAndUpdate(
         { _id: item },
         { condition: condition }
     )
-
-    console.log(fullItem)
 
     for (const rent of rentals) {
         let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
@@ -203,8 +200,7 @@ async function replaceItem(item, condition, start, end) {
             )
         } else {
             // If there is a replacement, the item is replaced
-            console.log(rent._id)
-            Rent.updateOne(
+            await Rent.updateOne(
                 { _id: rent._id, products: item },
                 {
                     $set: {
@@ -216,8 +212,6 @@ async function replaceItem(item, condition, start, end) {
                     },
                 }
             )
-                .exec()
-                .then((result) => console.log(result))
         }
     }
 }

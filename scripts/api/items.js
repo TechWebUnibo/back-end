@@ -130,14 +130,17 @@ router.post('/:id', auth.verifyToken, async (req, res) => {
             let start = new Date()
             start.setHours(0, 0, 0, 0)
             support.makeBroken([id], newData.condition, start.toISOString())
-        } else if (newData.condition && newData.condition === 'broken') {
+        } else if (newData.condition && newData.condition === 'broken' && (!newData.start || !newData.end || newData.start > newData.end)) {
             return res
                 .status(400)
                 .json({
                     message:
-                        'For a broken object use the api for create a reparation',
+                        'For a broken object you shuld insert a valid period of unavailability',
                     error: {},
                 })
+        }
+        else{
+            support.makeBroken([id], newData.condition, newData.start, newData.end)
         }
         result = await Item.findOneAndUpdate(
             { _id: id },
@@ -146,7 +149,7 @@ router.post('/:id', auth.verifyToken, async (req, res) => {
         )
         res.status(200).json({
             message: 'Data modified',
-            product: result,
+            item: result,
         })
     } else {
         res.status(400).json({ message: 'Bad input parameter', error: {} })

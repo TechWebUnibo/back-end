@@ -17,9 +17,10 @@ var router = express.Router()
 // Get all the reparation filtered by query parameters
 router.get('/', auth.verifyToken, (req, res) => {
     const query = req.query
-    Rep.find()
+    Rep.find(query)
         .exec()
         .then((result) => {
+            console.log(result)
             res.status(200).json(result)
         })
         .catch((err) => {
