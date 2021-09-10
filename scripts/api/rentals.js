@@ -281,7 +281,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             }
         }
 
-           if (rent.state === 'delayed') {
+        if (rent.state === 'delayed') {
             const diffDays = Math.round(
                 Math.abs((new Date() - rent.end) / oneDay)
             )
