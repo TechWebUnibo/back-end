@@ -68,7 +68,7 @@ const rentSchema = mongoose.Schema({
 
     state: {
         type: String,
-        required: true,
+            required: true,
         enum: [
             'not started',
             'cancelled',
