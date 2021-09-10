@@ -224,7 +224,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
     // Penalities to be added to the price of the rent
     let penalities = 0
-    if (rent && (rent.state === 'in progress' || rent.state === 'delayed' )) {
+    if (rent && (rent.state === 'in progress' || rent.state === 'delayed')) {
         let products = []
         let returnItems = req.body.products
         // Check if the item inserted are the same of the rental
@@ -259,7 +259,10 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             )
             // Apply an increase to the price if the items are returned in worse condition
             if (result.condition != returnItems[item].condition) {
-                console.log({cond1: result, cond2: returnItems[item].condition })
+                console.log({
+                    cond1: result,
+                    cond2: returnItems[item].condition,
+                })
                 if (
                     returnItems[item].condition === 'broken' ||
                     returnItems[item].condition === 'not available'
@@ -272,16 +275,17 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                             new Date().setHours(0, 0, 0, 0),
                         returnItems[item].end
                     )
-                } 
-                else{
+                } else {
                     penalities = penalities + result.price * damagedItem
                 }
             }
         }
 
-        if(rent.state === 'delayed'){
-            const diffDays = Math.round(Math.abs((new Date() - rent.end) / oneDay));
-            penalities = penalities + (diffDays * rent.price * delayedRent)
+        if (rent.state === 'delayed') {
+            const diffDays = Math.round(
+                Math.abs((new Date() - rent.end) / oneDay)
+            )
+            penalities = penalities + diffDays * rent.price * delayedRent
         }
 
         await Rent.updateOne({ _id: id }, { state: 'terminated' })

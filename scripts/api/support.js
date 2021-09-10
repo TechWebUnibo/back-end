@@ -152,7 +152,7 @@ function computeState(start, end) {
  * @param {*} item Item to be replaced
  * @param {*} day Day of the start
  */
-async function replaceItemPeriod(item, start, end){
+async function replaceItemPeriod(item, start, end) {
     let query = {}
     if (end) {
         query = {
@@ -180,7 +180,7 @@ async function replaceItemPeriod(item, start, end){
 
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find(query)
-    let fullItem = await Item.findOne( { _id: item })
+    let fullItem = await Item.findOne({ _id: item })
     replaceItem(fullItem, rentals)
 }
 
@@ -227,13 +227,12 @@ async function replaceUpdateItemPeriod(item, condition, start, end) {
     replaceItem(fullItem, rentals)
 }
 
-
 /**
  * Replace the current item for all the rentals given
  * @param {*} item Item to be replaced (the full item, not only the id)
  * @param {*} rentals Rentals where substitude the item
  */
-async function replaceItem(item, rentals){
+async function replaceItem(item, rentals) {
     for (const rent of rentals) {
         let freeItems = await getAvailable(item.type, rent.start, rent.end)
         // If there are not replacement, the rental must be cancelled
@@ -259,7 +258,7 @@ async function replaceItem(item, rentals){
             )
         }
     }
-} 
+}
 
 /**
  * Make a product unavailable for a given period.
@@ -271,7 +270,8 @@ async function replaceItem(item, rentals){
  * @param {Date} employee - Employee that is making the product unavailable
  */
 async function makeBroken(items, condition, start, end) {
-    for (const item of items) await replaceUpdateItemPeriod(item, condition, start, end)
+    for (const item of items)
+        await replaceUpdateItemPeriod(item, condition, start, end)
     if (end) {
         let rep = new Rep({
             _id: new mongoose.Types.ObjectId(),
