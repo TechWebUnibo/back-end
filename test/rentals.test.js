@@ -122,7 +122,7 @@ describe('Rentals', () => {
         const item1 = await createGenericItem(token)
         let rental1 = await createRent(start, end, token)
         await startRent(rental1._id, token)
-        await delay(8 000);
+        await delay(8000);
         let invoice = await terminateRent(rental1, token)
         await deleteItem(item1._id, token)
         await deleteRent(rental1._id, token)
@@ -138,7 +138,7 @@ describe('Negative test', async () => {
         let item = await createItem(products[0]._id, token)
         const rental = await createRent(start, end, token)
         const res = await request.post(`rentals/${rental._id}/start`).set('Authorization', `Bearer ${token}`).send()
-            deleteRent(rental._id, token)
+        deleteRent(rental._id, token)
         deleteItem(item._id, token)
         expect(res.status).to.be.eq(400)
     });
