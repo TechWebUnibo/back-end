@@ -148,14 +148,11 @@ function computeState(start, end) {
 }
 
 /**
- * Replace the current item for all the rentals in the given period. If no
- * item is available the rent is cancelled.
+ * Replace the current item for all the rentals that starts in the given date
  * @param {*} item Item to be replaced
- * @param {*} condition Condition of the item
- * @param {*} start Start period
- * @param {*} end  End period
+ * @param {*} day Day of the start
  */
-async function replaceItem(item, condition, start, end) {
+async function replaceItemPeriod(item, start, end){
     let query = {}
     if (end) {
         query = {
@@ -183,14 +180,62 @@ async function replaceItem(item, condition, start, end) {
 
     // Search for all the rentals that use that item in the given period
     let rentals = await Rent.find(query)
+    let fullItem = await Item.findOne( { _id: item })
+    replaceItem(fullItem, rentals)
+}
 
+/**
+ * Replace the current item for all the rentals in the given period. If no
+ * item is available the rent is cancelled.
+ * @param {*} item Item to be replaced
+ * @param {*} condition Condition of the item
+ * @param {*} start Start period
+ * @param {*} end  End period
+ */
+async function replaceUpdateItemPeriod(item, condition, start, end) {
+    let query = {}
+    if (end) {
+        query = {
+            products: item,
+            $or: [
+                { state: { $ne: 'cancelled' } },
+                { state: { $ne: 'terminated' } },
+            ],
+            $or: [
+                { start: { $gte: start, $lte: end } },
+                { end: { $gte: start, $lte: end } },
+                { start: { $lte: start }, end: { $gte: end } },
+            ],
+        }
+    } else {
+        query = {
+            products: item,
+            $or: [
+                { state: { $ne: 'cancelled' } },
+                { state: { $ne: 'terminated' } },
+            ],
+            start: { $gte: start },
+        }
+    }
+
+    // Search for all the rentals that use that item in the given period
+    let rentals = await Rent.find(query)
     let fullItem = await Item.findOneAndUpdate(
         { _id: item },
         { condition: condition }
     )
+    replaceItem(fullItem, rentals)
+}
 
+
+/**
+ * Replace the current item for all the rentals given
+ * @param {*} item Item to be replaced (the full item, not only the id)
+ * @param {*} rentals Rentals where substitude the item
+ */
+async function replaceItem(item, rentals){
     for (const rent of rentals) {
-        let freeItems = await getAvailable(fullItem.type, rent.start, rent.end)
+        let freeItems = await getAvailable(item.type, rent.start, rent.end)
         // If there are not replacement, the rental must be cancelled
         if (freeItems.length === 0) {
             await Rent.findOneAndUpdate(
@@ -201,7 +246,7 @@ async function replaceItem(item, condition, start, end) {
         } else {
             // If there is a replacement, the item is replaced
             await Rent.updateOne(
-                { _id: rent._id, products: item },
+                { _id: rent._id, products: item._id },
                 {
                     $set: {
                         'products.$': getCheapest(
@@ -214,7 +259,7 @@ async function replaceItem(item, condition, start, end) {
             )
         }
     }
-}
+} 
 
 /**
  * Make a product unavailable for a given period.
@@ -226,7 +271,7 @@ async function replaceItem(item, condition, start, end) {
  * @param {Date} employee - Employee that is making the product unavailable
  */
 async function makeBroken(items, condition, start, end) {
-    for (const item of items) await replaceItem(item, condition, start, end)
+    for (const item of items) await replaceUpdateItemPeriod(item, condition, start, end)
     if (end) {
         let rep = new Rep({
             _id: new mongoose.Types.ObjectId(),
@@ -246,5 +291,5 @@ exports.checkItems = checkItems
 exports.getCheapest = getCheapest
 exports.makeBroken = makeBroken
 exports.computeState = computeState
-exports.replaceItem = replaceItem
+exports.replaceItemPeriod = replaceItemPeriod
 exports.addDays = addDays

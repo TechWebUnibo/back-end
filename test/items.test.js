@@ -1,6 +1,6 @@
 import supertest from 'supertest'
 import { expect } from 'chai'
-import { createCustomer, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem, searchRent } from './helper'
+import { createCustomer, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem, searchRent, delay } from './helper'
 const bcrypt = require('bcryptjs')
 
 const uri = 'http://localhost:8000/api/'
@@ -53,7 +53,7 @@ describe('Items', () => {
         }
 
         const res = await request.post(`items/${item1._id}`).set('Authorization', `Bearer ${token}`).send(data)
-        await new Promise(r => setTimeout(r, 1000));
+        await delay(7000)
         rental = await searchRent(rental._id, token)
         await deleteRent(rental._id, token)
         await deleteItem(item1._id, token)

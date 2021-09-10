@@ -217,11 +217,14 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
 router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     const id = req.params.id
     const rent = await Rent.findOne({ _id: id })
+    const oneDay = 24 * 60 * 60 * 1000
     const damagedItem = 0.2
     const brokenItem = 0.8
+    const delayedRent = 0.2
+
     // Penalities to be added to the price of the rent
     let penalities = 0
-    if (rent && rent.state === 'in progress') {
+    if (rent && (rent.state === 'in progress' || rent.state === 'delayed' )) {
         let products = []
         let returnItems = req.body.products
         // Check if the item inserted are the same of the rental
@@ -255,7 +258,8 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                 { useFindAndModify: false }
             )
             // Apply an increase to the price if the items are returned in worse condition
-            if (result.condition != returnItems[item]) {
+            if (result.condition != returnItems[item].condition) {
+                console.log({cond1: result, cond2: returnItems[item].condition })
                 if (
                     returnItems[item].condition === 'broken' ||
                     returnItems[item].condition === 'not available'
@@ -268,8 +272,16 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                             new Date().setHours(0, 0, 0, 0),
                         returnItems[item].end
                     )
-                } else penalities = penalities + result.price * damagedItem
+                } 
+                else{
+                    penalities = penalities + result.price * damagedItem
+                }
             }
+        }
+
+        if(rent.state === 'delayed'){
+            const diffDays = Math.round(Math.abs((new Date() - rent.end) / oneDay));
+            penalities = penalities + (diffDays * rent.price * delayedRent)
         }
 
         await Rent.updateOne({ _id: id }, { state: 'terminated' })

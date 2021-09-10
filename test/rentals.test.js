@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import { expect } from 'chai'
-import { createCustomer, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem } from './helper'
-import { deleteCustomer } from './helper'
+import { delay ,createGenericItem, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem, startRent, searchRent, terminateRent } from './helper'
+import invoice from '../scripts/api/models/invoice'
 const bcrypt = require('bcryptjs')
 
 const uri = 'http://localhost:8000/api/'
@@ -77,6 +77,56 @@ describe('Rentals', () => {
         deleteRent(rental._id, token)
         deleteItem(item._id, token)
         expect(result.status).to.be.eq(200)
+    });
+
+    it('Make a rental in late (no substituion)', async () => {
+        const start = new Date().toISOString().split('T')[0]
+        const end = start
+        const item = await createGenericItem(token)
+        let rental1 = await createRent(start, end, token)
+        let rental2 = await createRent(addDays(start, 2), addDays(start, 4), token)
+        await startRent(rental1._id, token)
+        await delay(8000);
+        rental1 =  await searchRent(rental1._id, token)
+        rental2 =  await searchRent(rental2._id, token)
+        deleteItem(item._id, token)
+        deleteRent(rental1._id, token)
+        deleteRent(rental2._id, token)
+        expect(rental1.state).to.be.eq('delayed')
+        expect(rental2.state).to.be.eq('cancelled')
+        
+    });
+
+    it('Make a rental in late (with substitution)', async () => {
+        const start = new Date().toISOString().split('T')[0]
+        const end = start
+        const item1 = await createGenericItem(token)
+        let rental1 = await createRent(start, end, token)
+        let rental2 = await createRent(addDays(start, 2), addDays(start, 4), token)
+        const item2 = await createGenericItem(token)
+        await startRent(rental1._id, token)
+        await delay(8000);
+        rental1 =  await searchRent(rental1._id, token)
+        rental2 =  await searchRent(rental2._id, token)
+        deleteItem(item1._id, token)
+        deleteItem(item2._id, token)
+        deleteRent(rental1._id, token)
+        deleteRent(rental2._id, token)
+        expect(rental1.state).to.be.eq('delayed')
+        expect(rental2.products).to.contain(item2._id)
+    });
+
+    it('Make a rental in late (check penalties)', async () => {
+        const start = new Date().toISOString().split('T')[0]
+        const end = start
+        const item1 = await createGenericItem(token)
+        let rental1 = await createRent(start, end, token)
+        await startRent(rental1._id, token)
+        await delay(8000);
+        let invoice = await terminateRent(rental1, token)
+        await deleteItem(item1._id, token)
+        await deleteRent(rental1._id, token)
+        expect(invoice.price).to.be.not.eq(rental1.price)
     });
 });
 

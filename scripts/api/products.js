@@ -164,8 +164,6 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     let end = req.query.end
     let rent = req.query.rent
 
-    console.log({ rent: rent })
-
     if (!start || !end || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {

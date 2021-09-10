@@ -20,6 +20,10 @@ export const createCustomer = async (password) => {
 }
 
 
+export const delay = async (time) =>{
+    return await new Promise(r => setTimeout(r, time))
+}
+
 export const loginCustomer = async (customer, password) => {
     const res = await request.post('login/customers').send({username: customer.username, password: password})
     return res.body.accessToken
@@ -81,6 +85,23 @@ export const createRent = async (start, end, token) =>{
     }
     const res = await request.post(`rentals/`).set('Authorization', `Bearer ${token}`).send(data)
     return res.body.rent
+}
+
+export const startRent = async(id, token) => {
+    const res = await request.post(`rentals/${id}/start`).set('Authorization', `Bearer ${token}`).send()
+    return res.body
+}
+
+export const terminateRent = async(rental, token) => {
+    let returnItem = {}
+    for (const item of rental.products) {
+        returnItem[item] = {
+            condition: 'perfect',
+        }
+    }
+    const res = await request.post(`rentals/${rental._id}/terminate`).set('Authorization', `Bearer ${token}`)
+    .send({ products: returnItem, notes: 'All the products in good state' })
+    return res.body
 }
 
 export const searchRent = async (id, token) =>{
