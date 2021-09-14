@@ -12,6 +12,7 @@ const fs = require('fs')
 const path = require('path')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { decode } = require('punycode')
 
 var router = express.Router()
 const keysPath = path.join(global.rootDir, '.keys')
@@ -165,6 +166,37 @@ router.post('/staff', (req, res) => {
         .exec()
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
+})
+router.post('/customers/authenticated', (req, res) => {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
+    if (token != null) {
+        jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
+            if (!err && decoded.role === 'customer')
+                return res.status(200).json({message: 'Valid token'})
+            else
+            return res.status(401).json({message: 'Invalid token'})
+        })
+    }
+    else
+        return res.status(401).json({ message: 'Invalid token' })
+})
+router.post('/staff/authenticated', (req, res) => {
+    const authHeader = req.headers['authorization']
+    const token = authHeader && authHeader.split(' ')[1]
+    const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
+    if (token != null) {
+        jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
+            // TODO - separare i db di manager ed admin?
+            if (!err && decoded.role === 'manager')
+                return res.status(200).json({ message: 'Valid token' })
+            else
+                return res.status(401).json({ message: 'Invalid token' })
+        })
+    }
+    else
+        return res.status(401).json({ message: 'Invalid token' })
 })
 
 module.exports = router
