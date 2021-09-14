@@ -167,7 +167,7 @@ router.post('/staff', (req, res) => {
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-router.post('/customers/authenticated', (req, res) => {
+router.get('/customers/authenticated', (req, res) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
@@ -182,7 +182,7 @@ router.post('/customers/authenticated', (req, res) => {
     else
         return res.status(401).json({ message: 'Invalid token' })
 })
-router.post('/staff/authenticated', (req, res) => {
+router.get('/staff/authenticated', (req, res) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
@@ -196,7 +196,7 @@ router.post('/staff/authenticated', (req, res) => {
         })
     }
     else
-        return res.status(401).json({ message: 'Invalid token' })
+    return res.status(401).json({ message: 'Invalid token' })
 })
 
 module.exports = router
