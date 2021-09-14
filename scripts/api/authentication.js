@@ -174,13 +174,10 @@ router.get('/customers/authenticated', (req, res) => {
     if (token != null) {
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
             if (!err && decoded.role === 'customer')
-                return res.status(200).json({message: 'Valid token'})
-            else
-            return res.status(401).json({message: 'Invalid token'})
+                return res.status(200).json({ message: 'Valid token' })
+            else return res.status(401).json({ message: 'Invalid token' })
         })
-    }
-    else
-        return res.status(401).json({ message: 'Invalid token' })
+    } else return res.status(401).json({ message: 'Invalid token' })
 })
 router.get('/staff/authenticated', (req, res) => {
     const authHeader = req.headers['authorization']
@@ -191,11 +188,9 @@ router.get('/staff/authenticated', (req, res) => {
             // TODO - separare i db di manager ed admin?
             if (!err && decoded.role === 'manager')
                 return res.status(200).json({ message: 'Valid token' })
-            else
-                return res.status(401).json({ message: 'Invalid token' })
+            else return res.status(401).json({ message: 'Invalid token' })
         })
-    }
-    else
+    } else 
     return res.status(401).json({ message: 'Invalid token' })
 })
 
