@@ -17,7 +17,7 @@ const products = require('./scripts/api/products')
 const rentals = require('./scripts/api/rentals')
 const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
-const history = require('connect-history-api-fallback');
+const history = require('connect-history-api-fallback')
 
 const routines = require('./scripts/routines')
 
@@ -42,18 +42,23 @@ app.use('/css', express.static(global.rootDir + '/public/css'))
 app.use('/data', express.static(global.rootDir + '/public/data'))
 app.use('/img', express.static(global.rootDir + '/public/media/img'))
 
-app.use(history({
-    rewrites:[
-        { from: /management-dashboard(\W|\w)*/, to: '/management-dashboard' },
-        {
-            from: /^\/api\/.*$/,
-            to: function (context) {
-                return context.parsedUrl.path
-            }
-        }
-    ],
-    disableDotRule: false
-}))
+app.use(
+    history({
+        rewrites: [
+            {
+                from: /management-dashboard(\W|\w)*/,
+                to: '/management-dashboard',
+            },
+            {
+                from: /^\/api\/.*$/,
+                to: function (context) {
+                    return context.parsedUrl.path
+                },
+            },
+        ],
+        disableDotRule: false,
+    })
+)
 
 // Set APIs route
 app.use('/api/customers/', customers)
@@ -74,8 +79,10 @@ db.once('open', function () {
 
 routines.startRoutines()
 
-app.get('/management-dashboard', (req, res) =>{
-    res.sendFile(global.rootDir + '/public/html/management-dashboard/index.html')
+app.get('/management-dashboard', (req, res) => {
+    res.sendFile(
+        global.rootDir + '/public/html/management-dashboard/index.html'
+    )
 })
 
 app.listen(port, () => {
