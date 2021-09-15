@@ -44,21 +44,21 @@ app.use('/img', express.static(global.rootDir + '/public/media/img'))
 
 app.use(history({
     rewrites:[
-        { from: /management-dashboard(\W|\w)*/, to: '/management-dashboard' },
+    { from: /management-dashboard(\W|\w)*/, to: '/management-dashboard' },
         {
             from: /^\/api\/.*$/,
             to: function (context) {
                 return context.parsedUrl.path
             }
         }
-    ],
+    ],  
     disableDotRule: false
 }))
 
 // Set APIs route
 app.use('/api/customers/', customers)
 app.use('/api/staff/', staff)
-app.use('/api/login/', auth)
+app.use('/api/auth/', auth)
 app.use('/api/items/', items)
 app.use('/api/products/', products)
 app.use('/api/rentals/', rentals)

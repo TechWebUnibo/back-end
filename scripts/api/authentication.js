@@ -153,21 +153,21 @@ function sendError(err) {
     res.status(500).json({ message: 'Server error', error: err })
 }
 
-router.post('/customers', (req, res) => {
+router.post('/login/customers', (req, res) => {
     let data = req.body
     Customer.findOne({ username: data.username })
         .exec()
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-router.post('/staff', (req, res) => {
+router.post('/login/staff', (req, res) => {
     let data = req.body
     Employee.findOne({ username: data.username })
         .exec()
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-router.get('/customers/authenticated', (req, res) => {
+router.get('customers/authenticated', (req, res) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
@@ -192,6 +192,13 @@ router.get('/staff/authenticated', (req, res) => {
         })
     } else return res.status(401).json({ message: 'Invalid token' })
 })
+
+router.get('/publicKey', (req, res) => {
+    const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
+    return res.status(200).json({ publicKey: publicKey.toString() })
+})
+
+
 
 module.exports = router
 module.exports.verifyToken = verifyToken
