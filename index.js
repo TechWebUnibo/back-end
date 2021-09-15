@@ -17,7 +17,7 @@ const products = require('./scripts/api/products')
 const rentals = require('./scripts/api/rentals')
 const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
-const history = require('connect-history-api-fallback');
+const history = require('connect-history-api-fallback')
 
 const routines = require('./scripts/routines')
 
@@ -48,7 +48,7 @@ app.use(history({
         {
             from: /^\/api\/.*$/,
             to: function (context) {
-                return context.parsedUrl.path
+            return context.parsedUrl.path
             }
         }
     ],  
@@ -74,8 +74,10 @@ db.once('open', function () {
 
 routines.startRoutines()
 
-app.get('/management-dashboard', (req, res) =>{
-    res.sendFile(global.rootDir + '/public/html/management-dashboard/index.html')
+app.get('/management-dashboard', (req, res) => {
+    res.sendFile(
+        global.rootDir + '/public/html/management-dashboard/index.html'
+    )
 })
 
 app.listen(port, () => {
