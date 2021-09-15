@@ -190,8 +190,7 @@ router.get('/staff/authenticated', (req, res) => {
                 return res.status(200).json({ message: 'Valid token' })
             else return res.status(401).json({ message: 'Invalid token' })
         })
-    } else 
-    return res.status(401).json({ message: 'Invalid token' })
+    } else return res.status(401).json({ message: 'Invalid token' })
 })
 
 module.exports = router
