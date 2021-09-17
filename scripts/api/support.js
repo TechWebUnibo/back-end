@@ -138,9 +138,9 @@ function computePrice(items, start, end) {
  */
 function computeState(start, end) {
     let state
-    if (Date.now() < Date.parse(start)) state = 'not started'
+    if (Date.now() < Date.parse(start)) state = 'not_started'
     else if (Date.now() > Date.parse(start) && Date.now() < Date.parse(end)) {
-        state = 'in progress'
+        state = 'in_progress'
     } else {
         state = 'terminated'
     }

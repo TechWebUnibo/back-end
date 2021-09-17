@@ -30,7 +30,7 @@ var delay = cron.schedule(
         let today = new Date()
         let rents = await Rent.find({
             $or: [
-                { end: { $lte: today }, state: 'in progress' },
+                { end: { $lte: today }, state: 'in_progress' },
                 { state: 'delayed' },
             ],
         })

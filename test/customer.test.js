@@ -44,7 +44,7 @@ describe('Customers', () =>{
             username: username,
             password: 'andrea123'
         }
-        return request.post(`login/customers`).send(data)
+        return request.post(`auth/login/customers`).send(data)
         .then((res) =>{
             token = res.body.accessToken
             expect(res.body).to.not.be.empty
@@ -98,7 +98,7 @@ describe('Negative test', ()=> {
             username: `Andrea-${Math.floor(Math.random() * 9999)}`,
             password: 'wrong password'
         }
-        const res = await request.post('login/customers').send(loginData)
+        const res = await request.post('auth/login/customers').send(loginData)
         expect(res.statusCode).to.be.eq(404)
     })
 
@@ -107,7 +107,7 @@ describe('Negative test', ()=> {
             username: customer.username,
             password: 'ppaapp'
         }
-        const res = await request.post('login/customers').send(loginData)
+        const res = await request.post('auth/login/customers').send(loginData)
         expect(res.statusCode).to.be.eq(403)
     })
 

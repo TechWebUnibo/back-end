@@ -70,9 +70,9 @@ const rentSchema = mongoose.Schema({
         type: String,
         required: true,
         enum: [
-            'not started',
+            'not_started',
             'cancelled',
-            'in progress',
+            'in_progress',
             'delayed',
             'terminated',
         ],

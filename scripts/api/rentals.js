@@ -48,7 +48,7 @@ router.post('/', auth.verifyToken, async (req, res) => {
             .status(408)
             .json({ message: 'The price is changed', error: {} })
     }
-    newRent.state = 'not started'
+    newRent.state = 'not_started'
     newRent
         .save()
         .then((result) => {
@@ -189,13 +189,13 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
     if (rent) {
         // Check if is still possible to start the rent
         if (
-            rent.state === 'not started' &&
+            rent.state === 'not_started' &&
             Date.parse(rent.start) <= Date.now() &&
             Date.parse(support.addDays(rent.end, 1)) >= Date.now()
         ) {
             const result = await Rent.findOneAndUpdate(
                 { _id: id },
-                { state: 'in progress' }
+                { state: 'in_progress' }
             )
             res.status(200).json(result)
         } else {
@@ -224,7 +224,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
 
     // Penalities to be added to the price of the rent
     let penalities = 0
-    if (rent && (rent.state === 'in progress' || rent.state === 'delayed')) {
+    if (rent && (rent.state === 'in_progress' || rent.state === 'delayed')) {
         let products = []
         let returnItems = req.body.products
         // Check if the item inserted are the same of the rental

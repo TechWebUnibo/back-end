@@ -18,7 +18,7 @@ const rent = require('./models/rent')
 
 var router = express.Router()
 
-const productsPath = 'img/products'
+const productsPath = '/img/products'
 const productsFullPath = path.join(
     global.rootDir,
     'public/media/',

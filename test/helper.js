@@ -25,7 +25,7 @@ export const delay = async (time) =>{
 }
 
 export const loginCustomer = async (customer, password) => {
-    const res = await request.post('login/customers').send({username: customer.username, password: password})
+    const res = await request.post('auth/login/customers').send({username: customer.username, password: password})
     return res.body.accessToken
 }
 
@@ -42,7 +42,7 @@ export const loginStaff = async () =>{
         username: 'Vitangelo Moscarda',
         password: 'antonio123'
     }
-    const res = await request.post('login/staff').send({ username: admin.username, password: admin.password })
+    const res = await request.post('auth/login/staff').send({ username: admin.username, password: admin.password })
     return res.body.accessToken
 }
 
