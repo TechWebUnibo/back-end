@@ -15,7 +15,7 @@ const auth = require('./authentication')
 
 var router = express.Router()
 
-const avatarPath = 'img/avatar'
+const avatarPath = '/img/avatar'
 const avatarFullPath = path.join(global.rootDir, 'public/media/', avatarPath)
 
 // Initialize local storage
