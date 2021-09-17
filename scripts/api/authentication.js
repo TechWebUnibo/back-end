@@ -198,8 +198,6 @@ router.get('/publicKey', (req, res) => {
     return res.status(200).json({ publicKey: publicKey.toString() })
 })
 
-
-
 module.exports = router
 module.exports.verifyToken = verifyToken
 module.exports.verifyLogin = verifyLogin
