@@ -40,7 +40,9 @@ app.use(express.json())
 app.use('/js', express.static(global.rootDir + '/public/js'))
 app.use('/css', express.static(global.rootDir + '/public/css'))
 app.use('/data', express.static(global.rootDir + '/public/data'))
-app.use('/img', express.static(global.rootDir + '/public/media/img'))
+
+
+    app.use('/img', express.static(global.rootDir + '/public/media/img'))
 
 app.use(
     history({
