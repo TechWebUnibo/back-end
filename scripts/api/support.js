@@ -114,20 +114,25 @@ function getCheapest(items, start, end) {
  * @return {Number} Price of the rent
  */
 function computePrice(items, start, end) {
-    const conditions = { perfect: 0, good: 0.05, suitable: 0.1, broken: 0 }
-    const bundleDiscount = 0.1
-    const renewTime = 86400000
-
-    // To obtain the number of days: perform a integer division of the timestamp difference with the value of a day
-    const days =
-        Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
-    let price = 0
-    for (let item of items) {
-        price = price + item.price - item.price * conditions[item.condition]
+    if(items.length === 0){
+        return 0
     }
-    price = price * days
-    if (items.length > 1) price = price - price * bundleDiscount
-    return Math.floor(price)
+    else{
+        const conditions = { perfect: 0, good: 0.05, suitable: 0.1, broken: 0 }
+        const bundleDiscount = 0.1
+        const renewTime = 86400000
+    
+        // To obtain the number of days: perform a integer division of the timestamp difference with the value of a day
+        const days =
+            Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
+        let price = 0
+        for (let item of items) {
+            price = price + item.price - item.price * conditions[item.condition]
+        }
+        price = price * days
+        if (items.length > 1) price = price - price * bundleDiscount
+        return Math.floor(price)
+    }
 }
 
 /**
