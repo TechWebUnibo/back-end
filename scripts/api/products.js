@@ -181,7 +181,7 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
                         condition: { $ne: 'not available' },
                     })
                     let chosen = support.getCheapest(items, start, end)
-                    if(typeof chose != 'undefined')
+                    if (typeof chosen != 'undefined')
                         response.push(chosen)
                 }
                 // Provide only the price if the user is not logged
