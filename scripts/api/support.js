@@ -129,6 +129,7 @@ function computePrice(items, start, end) {
             price = price + item.price - item.price * conditions[item.condition]
         }
         price = price * days
+        console.log(price)
         if (items.length > 1) price = price - price * bundleDiscount
         return Math.floor(price)
     }

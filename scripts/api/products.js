@@ -164,7 +164,7 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     let end = req.query.end
     let rent = req.query.rent
 
-    if (!start || !end || start > end)
+    if (!Date.parse(start) || !Date.parse(end) || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {
         // Check if the type of item exists
@@ -181,8 +181,9 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
                         condition: { $ne: 'not available' },
                     })
                     let chosen = support.getCheapest(items, start, end)
-                if (typeof chosen != 'undefined')
-                        response.push(chosen)
+                    if (typeof chosen != 'undefined'){
+                     response.push(chosen)
+                    }
                 }
                 // Provide only the price if the user is not logged
                 return res.status(200).json({
