@@ -81,19 +81,11 @@ router.get('/', auth.verifyToken, async (req, res) => {
                         _id: rent.products[index],
                     })
                     console.log(rent.products[index], index)
-<<<<<<< HEAD
                     let product = await Product.findOne({_id: fullItem.type})
                 rent.products[index] = product.name
                 }
             }
             res.status(200).json(rents)
-=======
-                    let product = await Product.findOne({ _id: fullItem.type })
-                    rent.products[index] = product.name
-                }
-            }
-            res.status(200).json({ rents })
->>>>>>> 8cfa2797a2e32d550a462a50ab6a479adf2d543e
         }
     } catch (err) {
         res.status(400).json({

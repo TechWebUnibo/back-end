@@ -56,7 +56,7 @@ router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
     let data = req.body
     data._id = new mongoose.Types.ObjectId()
     data.img = path.join(productsPath, req.file.filename)
-    const newProduct = new Product(data)
+const newProduct = new Product(data)
     newProduct
         .save()
         .then((result) => {
