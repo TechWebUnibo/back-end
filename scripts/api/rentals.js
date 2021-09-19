@@ -81,8 +81,8 @@ router.get('/', auth.verifyToken, async (req, res) => {
                         _id: rent.products[index],
                     })
                     console.log(rent.products[index], index)
-                    let product = await Product.findOne({_id: fullItem.type})
-                rent.products[index] = product.name
+                    let product = await Product.findOne({ _id: fullItem.type })
+                    rent.products[index] = product.name
                 }
             }
             res.status(200).json(rents)
