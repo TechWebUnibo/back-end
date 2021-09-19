@@ -8,6 +8,7 @@
 const express = require('express')
 const mongoose = require('mongoose')
 const Item = require('./models/item')
+const Product = require('./models/product')
 const support = require('./support')
 const Invoice = require('./models/invoice')
 const Rent = require('./models/rent')
@@ -62,22 +63,36 @@ router.post('/', auth.verifyToken, async (req, res) => {
         })
 })
 
-router.get('/', auth.verifyToken, (req, res) => {
+router.get('/', auth.verifyToken, async (req, res) => {
     const query = req.query
+    const productName = req.query.productName
+    delete query.productName
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
 
-    Rent.find(req.query)
-        .exec()
-        .then((result) => {
-            res.status(200).json(result)
+    try{
+        let rents = await Rent.find(query)
+        if(!productName){
+            res.status(200).json(rents)
+        }
+        else{
+            for (const rent of rents) {
+                for (const index in rent.products) {
+                    let fullItem = await Item.findOne({_id: rent.products[index]})
+                    console.log(rent.products[index], index)
+                    let product = await Product.findOne({_id: fullItem.type})
+                    rent.products[index] = product.name
+                }
+            }
+            res.status(200).json({rents})
+        }
+    }
+    catch(err){
+        res.status(400).json({
+            message: 'Bad query',
+            error: err,
         })
-        .catch((err) => {
-            res.status(400).json({
-                message: 'Bad query',
-                error: err,
-            })
-        })
+    }
 })
 
 router.get('/:rentId', auth.verifyToken, async (req, res) => {
