@@ -81,10 +81,10 @@ router.get('/', auth.verifyToken, async (req, res) => {
                     let fullItem = await Item.findOne({_id: rent.products[index]})
                     console.log(rent.products[index], index)
                     let product = await Product.findOne({_id: fullItem.type})
-                    rent.products[index] = product.name
+                rent.products[index] = product.name
                 }
             }
-            res.status(200).json({rents})
+            res.status(200).json(rents)
         }
     }
     catch(err){

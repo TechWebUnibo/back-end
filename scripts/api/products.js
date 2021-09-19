@@ -167,7 +167,7 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     if (!Date.parse(start) || !Date.parse(end) || start > end)
         res.status(400).json({ message: 'Bad query', error: {} })
     else {
-        // Check if the type of item exists
+        // Check if the type of item exists 
         const category = await Product.findOne({ _id: id })
         if (category) {
             let products =
