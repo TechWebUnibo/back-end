@@ -70,24 +70,32 @@ router.get('/', auth.verifyToken, async (req, res) => {
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
 
-    try{
+    try {
         let rents = await Rent.find(query)
-        if(!productName){
+        if (!productName) {
             res.status(200).json(rents)
-        }
-        else{
+        } else {
             for (const rent of rents) {
                 for (const index in rent.products) {
-                    let fullItem = await Item.findOne({_id: rent.products[index]})
+                    let fullItem = await Item.findOne({
+                        _id: rent.products[index],
+                    })
                     console.log(rent.products[index], index)
+<<<<<<< HEAD
                     let product = await Product.findOne({_id: fullItem.type})
                 rent.products[index] = product.name
                 }
             }
             res.status(200).json(rents)
+=======
+                    let product = await Product.findOne({ _id: fullItem.type })
+                    rent.products[index] = product.name
+                }
+            }
+            res.status(200).json({ rents })
+>>>>>>> 8cfa2797a2e32d550a462a50ab6a479adf2d543e
         }
-    }
-    catch(err){
+    } catch (err) {
         res.status(400).json({
             message: 'Bad query',
             error: err,
