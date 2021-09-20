@@ -61,7 +61,7 @@ router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
         .save()
         .then((result) => {
             res.status(200).json({
-                message: 'Item created',
+            message: 'Item created',
                 product: newProduct,
             })
         })
