@@ -20,7 +20,6 @@ router.get('/', auth.verifyToken, (req, res) => {
     Rep.find(query)
         .exec()
         .then((result) => {
-            console.log(result)
             res.status(200).json(result)
         })
         .catch((err) => {

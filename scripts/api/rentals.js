@@ -80,7 +80,6 @@ router.get('/', auth.verifyToken, async (req, res) => {
                     let fullItem = await Item.findOne({
                         _id: rent.products[index],
                     })
-                    console.log(rent.products[index], index)
                     let product = await Product.findOne({_id: fullItem.type})
                 rent.products[index] = product.name
                 }
@@ -143,10 +142,6 @@ router.post('/:rentId', auth.verifyToken, async (req, res) => {
             support.computePrice(items, newData.start, newData.end) !=
             newData.price
         ) {
-            console.log(
-                support.computePrice(items, newData.start, newData.end),
-                newData.price
-            )
             return res
                 .status(408)
                 .json({ message: 'The price is changed', error: {} })
@@ -214,11 +209,6 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
             )
             res.status(200).json(result)
         } else {
-            console.log(
-                Date.parse(rent.start),
-                Date.now(),
-                support.addDays(rent.end, 1)
-            )
             res.status(400).json({
                 message: 'Rent already in progress or terminated',
                 error: {},
@@ -274,10 +264,6 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             )
             // Apply an increase to the price if the items are returned in worse condition
             if (result.condition != returnItems[item].condition) {
-                console.log({
-                    cond1: result,
-                    cond2: returnItems[item].condition,
-                })
                 if (
                     returnItems[item].condition === 'broken' ||
                     returnItems[item].condition === 'not available'

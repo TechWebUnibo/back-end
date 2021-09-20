@@ -44,12 +44,10 @@ var delay = cron.schedule(
                 )
             }
             if (rent.state != 'delayed')
-                console.log(
                     await Rent.updateOne(
                         { _id: rent._id },
                         { state: 'delayed' }
                     )
-                )
         }
     },
     { scheduled: false }

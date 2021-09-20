@@ -173,7 +173,6 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
             let products =
                 category.products.length === 0 ? [id] : category.products
             let response = []
-            console.log(products)
             // Check if the user is logged
             if (!req.user) {
                 for (const product of products) {
