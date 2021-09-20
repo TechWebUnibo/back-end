@@ -29,7 +29,7 @@ router.get('/', auth.verifyToken, async (req, res) => {
                 let prodObj = {}
                 for (const [key, value] of invoice.products) {
                     let fullItem = await Item.findOne({
-                        _id: key
+                        _id: key,
                     })
                     let product = await Product.findOne({ _id: fullItem.type })
                     prodObj[product.name] = value
