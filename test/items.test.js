@@ -28,7 +28,7 @@ describe('Items', () => {
         let rental = await createRent(start, end, token)
 
         const data = {
-            condition: 'not available'
+            condition: 'not_available'
         }
 
         const res = await request.post(`items/${item1._id}`).set('Authorization', `Bearer ${token}`).send(data)
@@ -49,7 +49,7 @@ describe('Items', () => {
         const item2 = await createItem(products[0]._id, token)
 
         const data = {
-            condition: 'not available'
+            condition: 'not_available'
         }
 
         const res = await request.post(`items/${item1._id}`).set('Authorization', `Bearer ${token}`).send(data)

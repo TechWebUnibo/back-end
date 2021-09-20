@@ -266,7 +266,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             if (result.condition != returnItems[item].condition) {
                 if (
                     returnItems[item].condition === 'broken' ||
-                    returnItems[item].condition === 'not available'
+                    returnItems[item].condition === 'not_available'
                 ) {
                     penalities = penalities + result.price * brokenItem
                     await support.makeBroken(

@@ -19,7 +19,7 @@ function addDays(date, days) {
 async function getAvailable(id, start, end, rent) {
     let items = await Item.find({
         type: id,
-        condition: { $ne: 'not available' },
+        condition: { $ne: 'not_available' },
     })
     let freeItems = []
     for (let item of items) {

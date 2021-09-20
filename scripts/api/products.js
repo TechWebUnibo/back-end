@@ -178,7 +178,7 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
                 for (const product of products) {
                     let items = await Item.find({
                         type: product,
-                        condition: { $ne: 'not available' },
+                        condition: { $ne: 'not_available' },
                     })
                     let chosen = support.getCheapest(items, start, end)
                     if (typeof chosen != 'undefined') {

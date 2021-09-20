@@ -126,7 +126,7 @@ router.post('/:id', auth.verifyToken, async (req, res) => {
     let newData = req.body
     let item = await Item.find({ _id: id })
     if (item) {
-        if (newData.condition && newData.condition === 'not available') {
+        if (newData.condition && newData.condition === 'not_available') {
             let start = new Date()
             start.setHours(0, 0, 0, 0)
             support.makeBroken([id], newData.condition, start.toISOString())

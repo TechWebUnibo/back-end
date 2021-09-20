@@ -24,7 +24,7 @@ const itemSchema = mongoose.Schema({
     },
     condition: {
         type: String,
-        enum: ['perfect', 'good', 'suitable', 'broken', 'not available'],
+        enum: ['perfect', 'good', 'suitable', 'broken', 'not_available'],
         required: true,
     },
 })
