@@ -9,6 +9,8 @@ const express = require('express')
 const mongoose = require('mongoose')
 const Item = require('./models/item')
 const Product = require('./models/product')
+const Employee = require('./models/employee')
+const Customer = require('./models/customer')
 const support = require('./support')
 const Invoice = require('./models/invoice')
 const Rent = require('./models/rent')
@@ -64,28 +66,45 @@ router.post('/', auth.verifyToken, async (req, res) => {
 })
 
 router.get('/', auth.verifyToken, async (req, res) => {
-    const query = req.query
+    let query = req.query
     const productName = req.query.productName
+    const customerName = req.query.customerName
+    const employeeName = req.query.employeeName
     delete query.productName
+    delete query.customerName
+    delete query.employeeName
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
 
     try {
-        let rents = await Rent.find(query)
-        if (!productName) {
-            res.status(200).json(rents)
-        } else {
-            for (const rent of rents) {
-                for (const index in rent.products) {
-                    let fullItem = await Item.findOne({
-                        _id: rent.products[index],
+        let rents = await Rent.find(query).lean().exec()
+        if (productName || customerName || employeeName) {
+            for (let rent of rents) {
+                if (customerName) {
+                    let customer = await Customer.findOne({
+                        _id: rent.customer,
                     })
-                    let product = await Product.findOne({ _id: fullItem.type })
-                    rent.products[index] = product.name
+                    console.log(typeof rent.customer)
+                    rent.customer = customer.username
+                }
+                if (employeeName) {
+                    let employee = await Employee.findOne({
+                        _id: rent.employee,
+                    })
+                    rent.employee = employee.username
+                }
+                if (productName) {
+                    for (const index in rent.products) {
+                        let fullItem = await Item.findOne({
+                            _id: rent.products[index],
+                        })
+                        let product = await Product.findOne({ _id: fullItem.type })
+                        rent.products[index] = product.name
+                    }
                 }
             }
-            res.status(200).json(rents)
         }
+        res.status(200).json(rents)
     } catch (err) {
         res.status(400).json({
             message: 'Bad query',
