@@ -98,7 +98,9 @@ router.get('/', auth.verifyToken, async (req, res) => {
                         let fullItem = await Item.findOne({
                             _id: rent.products[index],
                         })
-                        let product = await Product.findOne({ _id: fullItem.type })
+                        let product = await Product.findOne({
+                            _id: fullItem.type,
+                        })
                         rent.products[index] = product.name
                     }
                 }
