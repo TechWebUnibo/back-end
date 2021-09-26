@@ -76,6 +76,7 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 router.post('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     let newData = req.body
+    if (typeof newData.password !== 'undefined')
     newData.password = bcrypt.hashSync(newData.password, 14)
     Employee.findOneAndUpdate(
         { _id: id },
