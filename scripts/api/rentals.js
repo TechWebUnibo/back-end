@@ -19,6 +19,8 @@ const auth = require('./authentication')
 
 var router = express.Router()
 
+
+// TODO check product type on model or in this function
 router.post('/', auth.verifyToken, async (req, res) => {
     let data = req.body
     data._id = new mongoose.Types.ObjectId()
