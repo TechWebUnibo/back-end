@@ -6,7 +6,7 @@
 const mongoose = require('mongoose')
 const Customer = require('./customer')
 const Employee = require('./employee')
-const Product = require('./item')
+const Product = require('./product')
 
 const rentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
