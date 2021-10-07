@@ -1,0 +1,51 @@
+version: 2.1
+jobs:
+  build:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - add_ssh_keys:
+          fingerprints:
+            - "5e:b7:a8:8c:9b:16:ef:87:f4:6d:9a:11:5e:d8:da:10"
+      - run:
+          name: Github config
+          command: |
+            git config user.email "antonio.lopez.8523@gmail.com"
+            git config user.name "elements72"
+      - run:
+          name: Prettier Write
+          command: |
+            npx prettier --write index.js ./scripts
+      - run:
+          name: Push changes to repo
+          command: |
+            git commit -am '[skip ci]'
+            git push origin develop
+      - run:
+          name: Substitute testing uri
+          command: |
+            sed -i 's|mongodb://localhost:27017/NoloNoloPlus|mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority|' index.js
+      - run:
+          name: Deploy
+          command: | 
+            ssh-keyscan -H ines.cs.unibo.it >> ~/.ssh/known_hosts
+            scp -r scripts/api/ antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
+            scp -r scripts/routines.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
+            scp index.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
+            scp package.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
+            scp package-lock.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
+      - run:
+          name: Install packages
+          command: |
+            ssh antonio.lopez2@ines.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html && npm install --only=production' "
+
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: develop

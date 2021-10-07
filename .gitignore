@@ -1,0 +1,15 @@
+node_modules
+build
+npm-debug.log
+.env
+.DS_Store
+docs
+jsdoc.json
+public
+
+script.sh
+
+mochawesome-report
+
+#Ignore keys for authentication
+*.key*
