@@ -167,7 +167,7 @@ router.post('/login/staff', (req, res) => {
         .then((user) => verifyUser(user, data, res))
         .catch(sendError)
 })
-router.get('customers/authenticated', (req, res) => {
+router.get('/customers/authenticated', (req, res) => {
     const authHeader = req.headers['authorization']
     const token = authHeader && authHeader.split(' ')[1]
     const publicKey = fs.readFileSync(path.join(keysPath, 'jwtRS256.key.pub')) // get public key
