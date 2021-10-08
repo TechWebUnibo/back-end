@@ -86,7 +86,6 @@ router.get('/', auth.verifyToken, async (req, res) => {
                     let customer = await Customer.findOne({
                         _id: rent.customer,
                     })
-                    console.log(typeof rent.customer)
                     rent.customer = customer.username
                 }
                 if (employeeName) {
@@ -105,6 +104,8 @@ router.get('/', auth.verifyToken, async (req, res) => {
                         })
                         rent.products[index] = product.name
                     }
+                    const fullProduct = await Product.findOne({ _id: rent.productType })
+                    rent.productType = fullProduct.name
                 }
             }
         }
@@ -318,6 +319,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             customer: rent.customer,
             employee: rent.employee,
             rent: rent._id,
+            productType: rent.productType,
             price: rent.price + penalities,
             start: rent.start,
             end: rent.end,

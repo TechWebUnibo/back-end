@@ -11,6 +11,7 @@ const Item = require('./models/item')
 const Product = require('./models/product')
 const auth = require('./authentication')
 const rent = require('./models/rent')
+const invoice = require('./models/invoice')
 
 var router = express.Router()
 
@@ -21,13 +22,13 @@ router.get('/', auth.verifyToken, async (req, res) => {
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
     try {
-        let invoices = await Invoice.find(query)
+        let invoices = await Invoice.find(query).lean().exec()
         if (!productName) {
             res.status(200).json(invoices)
         } else {
             for (let invoice of invoices) {
                 let prodObj = {}
-                for (const [key, value] of invoice.products) {
+                for (const [key, value] of Object.entries(invoice.products)) {
                     let fullItem = await Item.findOne({
                         _id: key,
                     })
@@ -35,6 +36,8 @@ router.get('/', auth.verifyToken, async (req, res) => {
                     prodObj[product.name] = value
                 }
                 invoice.products = prodObj
+                const fullProduct = await Product.findOne({ _id: invoice.productType })
+                invoice.productType = fullProduct.name
             }
             res.status(200).json(invoices)
         }

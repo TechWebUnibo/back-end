@@ -31,6 +31,45 @@ async function getAvailable(id, start, end, rent) {
     return freeItems
 }
 
+
+
+/** 
+* Check if the product type is correct and corresponds to the type of the item rented.
+* @param {Id} productType - Type of the product rented.
+* @param {Array} items - Items to be rented.
+* @return {Boolean}
+*/
+
+async function checkProductType(productType, items) {
+    productType = await Product.findOne({ _id: productType })
+
+    if (productType) {
+        if (productType.products.length === 0) {
+            const fullItem = await Items.findOne({ _id: items[0] })
+            return (items.length === 1 && productType._id.equals(fullItem.type))
+        }
+        else {
+            if (items.length !== productType.products.length) {
+                return false
+            }
+            else {
+                let checkFlag = true
+                let i = 0
+                console.log(items.length)
+                while (checkFlag && i < items.length) {
+                    let fullItem = await Items.findOne({ _id: items[i] })
+                    checkFlag = productType.products.includes(fullItem.type.toString())
+                    i = i + 1
+                }
+                return checkFlag
+            }
+        }
+    }
+    else {
+        return false
+    }
+}
+
 /**
  * Check if a list items is available in the given date.
  * @summary Check if an item is available.
@@ -291,6 +330,7 @@ async function makeBroken(items, condition, start, end) {
 exports.computePrice = computePrice
 exports.getAvailable = getAvailable
 exports.checkAvailability = checkAvailability
+exports.checkProductType = checkProductType
 exports.checkItems = checkItems
 exports.getCheapest = getCheapest
 exports.makeBroken = makeBroken
