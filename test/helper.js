@@ -79,6 +79,7 @@ export const createRent = async (start, end, token) =>{
         products: available.products,
         customer: id,
         employee: staff[0]._id,
+        productType: products[0]._id,
         start: start,
         end: end,
         price: available.price

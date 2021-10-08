@@ -45,6 +45,12 @@ const invoiceSchema = mongoose.Schema({
         of: Object,
     },
 
+    productType: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Products',
+        required: true,
+    },
+
     price: {
         type: Number,
         required: true,
