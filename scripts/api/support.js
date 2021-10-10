@@ -141,24 +141,23 @@ function getCheapest(items, start, end) {
         items[0]
     )
 }
-/** 
-* Compute the work days between two dates
-* @param {Date} start - Start date.
-* @param {End} end - End date.
-* @return {Number} Number of work days
-*/
+/**
+ * Compute the work days between two dates
+ * @param {Date} start - Start date.
+ * @param {End} end - End date.
+ * @return {Number} Number of work days
+ */
 
 function workday_count(start, end) {
-    let first = start.clone().endOf('week'); // end of first week
-    let last = end.clone().startOf('week'); // start of last week
-    let days = last.diff(first, 'days') * 5 / 7; // this will always multiply of 7
-    let wfirst = first.day() - start.day(); // check first week
-    if (start.day() == 0) --wfirst; // -1 if start with sunday 
-    let wlast = end.day() - last.day(); // check last week
-    if (end.day() == 6) --wlast; // -1 if end with saturday
-    return wfirst + Math.floor(days) + wlast; // get the total
+    let first = start.clone().endOf('week') // end of first week
+    let last = end.clone().startOf('week') // start of last week
+    let days = (last.diff(first, 'days') * 5) / 7 // this will always multiply of 7
+    let wfirst = first.day() - start.day() // check first week
+    if (start.day() == 0) --wfirst // -1 if start with sunday
+    let wlast = end.day() - last.day() // check last week
+    if (end.day() == 6) --wlast // -1 if end with saturday
+    return wfirst + Math.floor(days) + wlast // get the total
 }
-
 
 /**
  * Compute the price for the given item
@@ -174,7 +173,20 @@ function computePrice(items, start, end) {
     } else {
         const conditions = { perfect: 0, good: 0.05, suitable: 0.1, broken: 0 }
         // Every month has its percentage on the basic price
-        const period = { 0: 0, 1: 0, 2: 0.05, 3: 0.05, 4: 0.05, 5: 0.8, 6: 0.08, 7: 0.08, 8: 0, 9: 0, 10: 0, 11: 0.07 }
+        const period = {
+            0: 0,
+            1: 0,
+            2: 0.05,
+            3: 0.05,
+            4: 0.05,
+            5: 0.8,
+            6: 0.08,
+            7: 0.08,
+            8: 0,
+            9: 0,
+            10: 0,
+            11: 0.07,
+        }
         const workDays = [1, 2, 3, 4, 5]
         const weekDays = [0, 6]
         const halfDays = 0.5
@@ -186,7 +198,13 @@ function computePrice(items, start, end) {
         let halfDaysDiscount = false
 
         // Check if the user can use the half days discount
-        if ((workDays.includes(startDate.getDay()) && weekDays.includes(endDate.getDay())) || (weekDays.includes(startDate.getDay()) && workDays.includes(endDate.getDay())) || (workDaysCount > 5)){
+        if (
+            (workDays.includes(startDate.getDay()) &&
+                weekDays.includes(endDate.getDay())) ||
+            (weekDays.includes(startDate.getDay()) &&
+                workDays.includes(endDate.getDay())) ||
+            workDaysCount > 5
+        ) {
             halfDaysDiscount = true
         }
 
@@ -195,12 +213,17 @@ function computePrice(items, start, end) {
             Math.round((Date.parse(end) - Date.parse(start)) / renewTime) + 1
         let price = 0
         for (let item of items) {
-            price = price + (item.price - item.price * conditions[item.condition] + item.price * period[startDate.getMonth()]) 
+            price =
+                price +
+                (item.price -
+                    item.price * conditions[item.condition] +
+                    item.price * period[startDate.getMonth()])
         }
-        if(halfDaysDiscount){
-            price = (price * (days - workDaysCount) * halfDays) + (price * (days - workDaysCount))
-        }
-        else{
+        if (halfDaysDiscount) {
+            price =
+                price * (days - workDaysCount) * halfDays +
+                price * (days - workDaysCount)
+        } else {
             price = price * days
         }
         if (items.length > 1) price = price - price * bundleDiscount
