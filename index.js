@@ -19,16 +19,14 @@ const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const history = require('connect-history-api-fallback')
 
+const dotenv = require('dotenv');
+dotenv.config();
+
 const routines = require('./scripts/routines')
 
 // Constants
-const mongoCredentials = {
-    user: 'site202118',
-    pwd: 'om7Dieru',
-    site: 'mongo_site202118',
-}
 
-const uri = `mongodb://localhost:27017/NoloNoloPlus`
+const uri = process.env.MONGO_URI
 const port = 8000
 const db = mongoose.connection
 

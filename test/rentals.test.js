@@ -128,6 +128,17 @@ describe('Rentals', () => {
         await deleteRent(rental1._id, token)
         expect(invoice.price).to.be.not.eq(rental1.price)
     });
+
+    it('Check the "half work days" discount', async () => {
+        const start = new Date('2021-10-10').toISOString().split('T')[0]
+        const end = addDays(start, 1)
+        let products = await getProducts()
+        let item = await createItem(products[0]._id, token)
+        let available1 = await getAvailable(products[0]._id, start, end, token)
+        let available2 = await getAvailable(products[0]._id, end, addDays(end, 1), token)
+        await deleteItem(item._id, token)
+        expect(available1.price).to.be.lessThan(available2.price)
+    });
 });
 
 describe('Negative test', async () => {
