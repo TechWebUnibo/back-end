@@ -36,7 +36,9 @@ router.get('/', auth.verifyToken, async (req, res) => {
                     prodObj[product.name] = value
                 }
                 invoice.products = prodObj
-                const fullProduct = await Product.findOne({ _id: invoice.productType })
+                const fullProduct = await Product.findOne({
+                    _id: invoice.productType,
+                })
                 invoice.productType = fullProduct.name
             }
             res.status(200).json(invoices)

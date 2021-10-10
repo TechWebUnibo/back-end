@@ -19,7 +19,6 @@ const auth = require('./authentication')
 
 var router = express.Router()
 
-
 // TODO check product type on model or in this function
 router.post('/', auth.verifyToken, async (req, res) => {
     let data = req.body
@@ -104,7 +103,9 @@ router.get('/', auth.verifyToken, async (req, res) => {
                         })
                         rent.products[index] = product.name
                     }
-                    const fullProduct = await Product.findOne({ _id: rent.productType })
+                    const fullProduct = await Product.findOne({
+                        _id: rent.productType,
+                    })
                     rent.productType = fullProduct.name
                 }
             }
