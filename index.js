@@ -19,8 +19,8 @@ const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const history = require('connect-history-api-fallback')
 
-const dotenv = require('dotenv');
-dotenv.config();
+const dotenv = require('dotenv')
+dotenv.config()
 
 const routines = require('./scripts/routines')
 
