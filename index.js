@@ -58,6 +58,10 @@ app.use(
                     return context.parsedUrl.path
                 },
             },
+            {
+                from: /\/(\W|\w)*/,
+                to: '/'
+            }
         ],
         disableDotRule: false,
     })
