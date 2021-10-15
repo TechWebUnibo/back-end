@@ -87,6 +87,11 @@ app.get('/management-dashboard', (req, res) => {
         global.rootDir + '/public/html/management-dashboard/index.html'
     )
 })
+app.get('/', (req, res) => {
+    res.sendFile(
+    global.rootDir + '/public/index.html'
+    )
+})
 
 app.listen(port, () => {
     console.log('Server is listening...')
