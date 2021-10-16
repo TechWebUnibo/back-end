@@ -92,9 +92,7 @@ app.get('/management-dashboard', (req, res) => {
     )
 })
 app.get('/', (req, res) => {
-    res.sendFile(
-    global.rootDir + '/public/index.html'
-    )
+    res.sendFile(global.rootDir + '/public/index.html')
 })
 
 app.listen(port, () => {
