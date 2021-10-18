@@ -5,8 +5,11 @@ const uri = 'http://localhost:8000/api/'
 const request = supertest(uri)
 
 export const createCustomer = async (password) => {
+    let username = `Andrea-${Math.floor(Math.random() * 9999)}`
     const data =  {
-        username: `Andrea-${Math.floor(Math.random() * 9999)}`,
+        username: username,
+        name: username.split('-')[0],
+        surname: username.split('-')[1],
         password: password,
         address: {
             city: "Bologna",
@@ -78,7 +81,7 @@ export const createRent = async (start, end, token) =>{
     const data = {
         products: available.products,
         customer: id,
-        employee: staff[0]._id,
+        //employee: staff[0]._id,
         productType: products[0]._id,
         start: start,
         end: end,

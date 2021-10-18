@@ -10,9 +10,11 @@ const request = supertest(uri)
 describe('Customers', () =>{
     let id = ''
     let token = ''
-    let username
+    let username = `Andrea-${Math.floor(Math.random() * 9999)}`
     const userData = {
-        username: `Andrea-${Math.floor(Math.random() * 9999)}`,
+        username: username,
+        name: username.split('-')[0],
+        surname: username.split('-')[1],
         password: 'andrea123',
         address: {
             city: "Bologna",
