@@ -12,13 +12,13 @@ const customerSchema = mongoose.Schema({
         required: true,
         unique: true,
     },
-    name:{
+    name: {
         type: String,
-        required: true
+        required: true,
     },
-    surname:{
+    surname: {
         type: String,
-        required: true
+        required: true,
     },
     password: {
         type: String,

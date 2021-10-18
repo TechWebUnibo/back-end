@@ -10,7 +10,7 @@ const employeeSchema = mongoose.Schema({
     username: {
         type: String,
         required: true,
-    // unique: true TODO - add this when clear the db
+        // unique: true TODO - add this when clear the db
     },
     name: {
         type: String,

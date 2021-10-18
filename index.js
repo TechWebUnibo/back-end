@@ -60,8 +60,8 @@ app.use(
             },
             {
                 from: /\/(\W|\w)*/,
-                to: '/'
-            }
+                to: '/',
+            },
         ],
         disableDotRule: false,
     })
