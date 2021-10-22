@@ -24,24 +24,24 @@ router.post('/', auth.verifyToken, async (req, res) => {
     data._id = new mongoose.Types.ObjectId()
 
     // If the employee is not specified, pick one random
-    if(typeof data.employee === 'undefined'){
+    if (typeof data.employee === 'undefined') {
         let employees = await Employee.find().lean()
         let min, empId
-        if(employees.length === 0){
+        if (employees.length === 0) {
             return res.status(500).json('No employee available')
         }
         empId = employees[0]._id
         min = await Rent.count({ employee: empId }).exec()
         for (const employee of employees) {
-            let count = await Rent.count({employee: employee._id}).exec()
-            if(min > count){
+            let count = await Rent.count({ employee: employee._id }).exec()
+            if (min > count) {
                 min = count
-                empId = employee._id 
+                empId = employee._id
             }
-            console.log({empId: empId, count: count})
+            console.log({ empId: empId, count: count })
         }
         data.employee = empId
-    } 
+    }
 
     newRent = new Rent(data)
     // Check the consistancy of the price and the real availability of the products
