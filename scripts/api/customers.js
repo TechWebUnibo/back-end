@@ -71,6 +71,27 @@ router.get('/', (req, res) => {
         })
 })
 
+/**
+ * Get the customer with the given id.
+ * @param {res} res Response object
+ */
+router.get('/:id', async (req, res) => {
+    const id = req.params.id
+    try{
+        const customer = await Customer.findById(id)
+        if(customer){
+            res.status(200).json(customer)
+        }
+        else{
+            res.status(404).json({message: 'Customer not found'})
+        }
+    }
+    catch(err){
+        return res.status(500).json({ message: 'Internal error', error: err })
+    }
+
+})
+
 function deleteAvatar(avatar) {
     if (avatar) {
         try {
