@@ -87,7 +87,7 @@ router.get('/:id', async (req, res) => {
         }
     }
     catch(err){
-        return res.status(500)
+        return res.status(500).json({ message: 'Internal error', error: err })
     }
 
 })
