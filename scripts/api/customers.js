@@ -77,19 +77,16 @@ router.get('/', (req, res) => {
  */
 router.get('/:id', async (req, res) => {
     const id = req.params.id
-    try{
+    try {
         const customer = await Customer.findById(id)
-        if(customer){
+        if (customer) {
             res.status(200).json(customer)
+        } else {
+            res.status(404).json({ message: 'Customer not found' })
         }
-        else{
-            res.status(404).json({message: 'Customer not found'})
-        }
-    }
-    catch(err){
+    } catch (err) {
         return res.status(500).json({ message: 'Internal error', error: err })
     }
-
 })
 
 function deleteAvatar(avatar) {
