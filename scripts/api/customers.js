@@ -142,7 +142,8 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
-                deleteAvatar(result.avatar)
+                if(result.avatar)
+                    deleteAvatar(result.avatar)
                 res.status(200).json({
                     message: 'Data modified',
                     customer: result,
