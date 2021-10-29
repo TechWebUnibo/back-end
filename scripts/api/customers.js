@@ -128,12 +128,12 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.password = newData.password
-        ? bcrypt.hashSync(newData.password, 14)
-        : undefined
+    if (newData.password){
+        newData.password = bcrypt.hashSync(newData.password, 14)
+    }
     if(req.file){
         newData.avatar = path.join(avatarPath, req.file.filename)
-     }
+    }
     Customer.findOneAndUpdate(
         { _id: id },
         { $set: newData },
