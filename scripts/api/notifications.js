@@ -17,13 +17,14 @@ router.get('/customers/:id', auth.verifyToken, async (req, res) => {
         const exist = await Customer.exists({ _id: id })
         if (!exist) {
             res.status(404).json({ message: 'Customer not found' })
-        }
-        else{
-            const results = await Notification.find({customer: id, checked: false})
+        } else {
+            const results = await Notification.find({
+                customer: id,
+                checked: false,
+            })
             res.status(200).json(results)
         }
-    }
-    catch{
+    } catch {
         console.log(err)
         res.status(500).json(err)
     }
