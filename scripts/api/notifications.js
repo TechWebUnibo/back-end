@@ -19,8 +19,10 @@ router.get('/customers/:id', auth.verifyToken, async (req, res) => {
         if (!exist){
             res.status(404).json({message: 'Customer not found'})
         }
-        const results = await Notification.find({customer: id, checked: false})
-        res.status(200).json(results)
+        else{
+            const results = await Notification.find({customer: id, checked: false})
+            res.status(200).json(results)
+        }
     }
     catch{
         console.log(err)
