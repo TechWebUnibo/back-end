@@ -35,7 +35,7 @@ const notificationSchema = mongoose.Schema({
 
     checked: {
         type: Boolean,
-        default: false
+        default: false,
     },
 
     state: {
@@ -50,6 +50,5 @@ const notificationSchema = mongoose.Schema({
         ],
     },
 })
-
 
 module.exports = mongoose.model('Notification', notificationSchema)

@@ -253,7 +253,11 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
                 { _id: id },
                 { state: 'in_progress' }
             )
-            await notify.createNotification(result.customer, result._id, 'in_progress')
+            await notify.createNotification(
+                result.customer,
+                result._id,
+                'in_progress'
+            )
             res.status(200).json(result)
         } else {
             res.status(400).json({

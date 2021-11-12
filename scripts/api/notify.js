@@ -6,17 +6,14 @@
 const Notification = require('./models/notification')
 const mongoose = require('mongoose')
 
-
 async function createNotification(customer, rent, state) {
     const _id = new mongoose.Types.ObjectId()
-    const newN = new Notification({ _id, customer, rent, state})
-    try{
+    const newN = new Notification({ _id, customer, rent, state })
+    try {
         await newN.save()
-    }
-    catch(err){
+    } catch (err) {
         console.log(err)
     }
-
 }
 
 exports.createNotification = createNotification
