@@ -10,6 +10,7 @@ const Product = require('./models/product')
 const Rent = require('./models/rent')
 const Rep = require('./models/reparation')
 const moment = require('moment')
+const notify = require('./notify')
 
 function addDays(date, days) {
     var result = new Date(date)
@@ -343,6 +344,7 @@ async function replaceItem(item, rentals) {
                 { state: 'cancelled' },
                 { useFindAndModify: true }
             )
+            await notify.createNotification(rent.customer, rent._id, 'cancelled')
         } else {
             // If there is a replacement, the item is replaced
             await Rent.updateOne(

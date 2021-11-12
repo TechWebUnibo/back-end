@@ -15,6 +15,8 @@ const support = require('./support')
 const Invoice = require('./models/invoice')
 const Rent = require('./models/rent')
 
+const notify = require('./notify')
+
 const auth = require('./authentication')
 
 var router = express.Router()
@@ -38,7 +40,6 @@ router.post('/', auth.verifyToken, async (req, res) => {
                 min = count
                 empId = employee._id
             }
-            console.log({ empId: empId, count: count })
         }
         data.employee = empId
     }
@@ -252,6 +253,7 @@ router.post('/:id/start', auth.verifyToken, async (req, res) => {
                 { _id: id },
                 { state: 'in_progress' }
             )
+            await notify.createNotification(result.customer, result._id, 'in_progress')
             res.status(200).json(result)
         } else {
             res.status(400).json({
@@ -347,6 +349,8 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
             products: returnItems,
             notes: req.body.notes,
         })
+
+        await notify.createNotification(rent.customer, rent._id, 'terminated')
 
         await invoice.save()
 

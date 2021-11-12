@@ -148,3 +148,8 @@ export const getReparations = async (id, token) => {
     const res = await request.get(`reparations/?products=${id}`).set('Authorization', `Bearer ${token}`).send()
     return res.body
 }
+
+export const getNotifications = async (id, token) => {
+    const res = await request.get(`notifications/customers/${id}`).set('Authorization', `Bearer ${token}`).send()
+    return res.body
+}

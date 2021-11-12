@@ -1,6 +1,6 @@
 import supertest from 'supertest'
 import { expect } from 'chai'
-import { delay ,createGenericItem, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem, startRent, searchRent, terminateRent } from './helper'
+import { delay ,createGenericItem, createRent, deleteRent, loginStaff, getProducts, getAvailable, createItem, deleteItem, startRent, searchRent, terminateRent, getNotifications } from './helper'
 import invoice from '../scripts/api/models/invoice'
 const bcrypt = require('bcryptjs')
 
@@ -30,8 +30,10 @@ describe('Rentals', () => {
         
         const rental = await createRent(start, end, token)
         const res = await request.post(`rentals/${rental._id}/start`).set('Authorization', `Bearer ${token}`).send()
+        const notify = await getNotifications(rental.customer, token)
         deleteRent(rental._id, token)
         deleteItem(item._id, token)
+        expect(notify[notify.length - 1]).to.deep.include({ customer: rental.customer, rent: rental._id ,state: 'in_progress'})
         expect(res.status).to.be.eq(200)
     });
 
@@ -55,7 +57,8 @@ describe('Rentals', () => {
         .send({products :returnItem, notes: 'All the products in good state'})
         deleteRent(rental._id, token)
         deleteItem(item._id, token)
-
+        const notify = await getNotifications(rental.customer, token)
+        expect(notify[notify.length - 1]).to.deep.include({ customer: rental.customer, rent: rental._id, state: 'terminated' })
         expect(res.body.products).to.have.all.keys(Object.keys(returnItem))
     });
 
@@ -92,6 +95,8 @@ describe('Rentals', () => {
         deleteItem(item._id, token)
         deleteRent(rental1._id, token)
         deleteRent(rental2._id, token)
+        const notify = await getNotifications(rental1.customer, token)
+        expect(notify[notify.length - 1]).to.deep.include({ customer: rental2.customer, rent: rental2._id, state: 'cancelled' })
         expect(rental1.state).to.be.eq('delayed')
         expect(rental2.state).to.be.eq('cancelled')
         
