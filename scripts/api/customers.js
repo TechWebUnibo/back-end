@@ -131,9 +131,9 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
     newData.password = newData.password
         ? bcrypt.hashSync(newData.password, 14)
         : undefined
-    if(req.file){
+    if (req.file) {
         newData.avatar = path.join(avatarPath, req.file.filename)
-     }
+    }
     Customer.findOneAndUpdate(
         { _id: id },
         { $set: newData },
