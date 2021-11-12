@@ -9,22 +9,30 @@ const Notification = require('./models/notification')
 const auth = require('./authentication')
 const Customer = require('./models/customer')
 
-
 var router = express.Router()
 
 router.get('/customers/:id', auth.verifyToken, async (req, res) => {
     const id = req.params.id
-    try{
-        const exist = await Customer.exists({_id: id})
-        if (!exist){
-            res.status(404).json({message: 'Customer not found'})
+    try {
+        const exist = await Customer.exists({ _id: id })
+        if (!exist) {
+            res.status(404).json({ message: 'Customer not found' })
         }
+<<<<<<< HEAD
         else{
             const results = await Notification.find({customer: id, checked: false})
             res.status(200).json(results)
         }
     }
     catch{
+=======
+        const results = await Notification.find({
+            customer: id,
+            checked: false,
+        })
+        res.status(200).json(results)
+    } catch {
+>>>>>>> 09e9cc92af880964f0865421450a8c880eb7faa8
         console.log(err)
         res.status(500).json(err)
     }
@@ -33,15 +41,16 @@ router.get('/customers/:id', auth.verifyToken, async (req, res) => {
 // Make a notification checked
 router.post('/customers/check/:id', async (req, res) => {
     const id = req.params.id
-    try{
-        const exist = await Notification.exists({_id: id})
-        if (!exist){
-            res.status(404).json({message: 'Notification not found'})
+    try {
+        const exist = await Notification.exists({ _id: id })
+        if (!exist) {
+            res.status(404).json({ message: 'Notification not found' })
         }
-        const results = await Notification.findByIdAndUpdate(id, {checked: true})
+        const results = await Notification.findByIdAndUpdate(id, {
+            checked: true,
+        })
         res.status(200).json(results)
-    }
-    catch{
+    } catch {
         console.log(err)
         res.status(500).json(err)
     }

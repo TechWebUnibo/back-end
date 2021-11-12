@@ -344,7 +344,11 @@ async function replaceItem(item, rentals) {
                 { state: 'cancelled' },
                 { useFindAndModify: true }
             )
-            await notify.createNotification(rent.customer, rent._id, 'cancelled')
+            await notify.createNotification(
+                rent.customer,
+                rent._id,
+                'cancelled'
+            )
         } else {
             // If there is a replacement, the item is replaced
             await Rent.updateOne(
