@@ -21,7 +21,7 @@ router.get('/customers/:id', auth.verifyToken, async (req, res) => {
         } else {
             const results = await Notification.find({
                 customer: id,
-                ...query
+                ...query,
             })
             res.status(200).json(results)
         }
