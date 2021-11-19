@@ -142,7 +142,7 @@ function verifyUser(user, data, res) {
             { expiresIn: '1h', algorithm: 'RS256' },
             (err, token) => {
                 if (err) res.status(500).json({ message: 'Internal error' })
-                else res.status(200).json({ accessToken: token,     id: user._id })
+                else res.status(200).json({ accessToken: token, id: user._id })
             }
         )
     }
