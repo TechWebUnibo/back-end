@@ -8,7 +8,7 @@ const mongoose = require('mongoose')
 
 async function createNotification(customer, rent, state) {
     const _id = new mongoose.Types.ObjectId()
-    const newN = new Notification({ _id, customer, rent, state })
+    const newN = new Notification({ _id, customer, rent, state, date: new Date() })
     try {
         await newN.save()
     } catch (err) {

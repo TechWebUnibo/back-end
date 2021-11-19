@@ -38,6 +38,10 @@ const notificationSchema = mongoose.Schema({
         default: false,
     },
 
+    date: {
+        type: Date
+    },
+    
     state: {
         type: String,
         required: true,

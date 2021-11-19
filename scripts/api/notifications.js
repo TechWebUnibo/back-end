@@ -13,6 +13,7 @@ var router = express.Router()
 
 router.get('/customers/:id', auth.verifyToken, async (req, res) => {
     const id = req.params.id
+    const query = req.query
     try {
         const exist = await Customer.exists({ _id: id })
         if (!exist) {
@@ -20,7 +21,7 @@ router.get('/customers/:id', auth.verifyToken, async (req, res) => {
         } else {
             const results = await Notification.find({
                 customer: id,
-                checked: false,
+                ...query
             })
             res.status(200).json(results)
         }
