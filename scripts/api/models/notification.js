@@ -39,9 +39,9 @@ const notificationSchema = mongoose.Schema({
     },
 
     date: {
-        type: Date
+        type: Date,
     },
-    
+
     state: {
         type: String,
         required: true,
