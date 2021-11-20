@@ -20,6 +20,8 @@ const notifications = require('./scripts/api/notifications')
 const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const history = require('connect-history-api-fallback')
+const path = require('path')
+
 const dotenv = require('dotenv')
 require('dotenv').config({ path: path.resolve(global.rootDir + "/.env") });
 
