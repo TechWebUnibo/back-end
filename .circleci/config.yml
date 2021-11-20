@@ -14,15 +14,6 @@ jobs:
             git config user.email "antonio.lopez.8523@gmail.com"
             git config user.name "elements72"
       - run:
-          name: Prettier Write
-          command: |
-            npx prettier --write index.js ./scripts
-      - run:
-          name: Push changes to repo
-          command: |
-            git commit -am '[skip ci]'
-            git push origin develop
-      - run:
           name: Substitute testing uri
           command: |
             sed -i 's|mongodb://localhost:27017/NoloNoloPlus|mongodb://${mongoCredentials.user}:${mongoCredentials.pwd}@${mongoCredentials.site}?writeConcern=majority|' index.js
