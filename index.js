@@ -25,14 +25,9 @@ const path = require('path')
 const dotenv = require('dotenv')
 require('dotenv').config({ path: path.resolve(global.rootDir + "/.env") });
 
-const routines = require('./scripts/routines')
+console.log(process.env.MONGO_URI)
 
-// Constants
-const mongoCredentials = {
-    user: 'site202118',
-    pwd: 'om7Dieru',
-    site: 'mongo_site202118',
-}
+const routines = require('./scripts/routines')
 
 const uri = `mongodb://localhost:27017/NoloNoloPlus`
 const port = 8000
@@ -84,7 +79,7 @@ app.use('/api/notifications/', notifications)
 app.use('/api/scripts/', scripts)
 
 // Connect the database
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function () {
     console.log('Connected to Mongo!')

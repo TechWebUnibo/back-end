@@ -1,7 +1,8 @@
 
 const express = require('express')
 const mongoose = require('mongoose')
-
+const dotenv = require('dotenv')
+require('dotenv').config({ path: path.resolve(global.rootDir + "/.env") });
 
 var router = express.Router()
 
