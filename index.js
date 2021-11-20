@@ -21,7 +21,7 @@ const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const history = require('connect-history-api-fallback')
 const dotenv = require('dotenv')
-dotenv.config({path: './.env'})
+require('dotenv').config({ path: path.resolve(global.rootDir + "/.env") });
 
 const routines = require('./scripts/routines')
 
