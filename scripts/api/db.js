@@ -1,12 +1,16 @@
-const mongoose = require('mongoose')
-require('dotenv').config({ path: './.env' })
 
+const express = require('express')
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+dotenv.config({ path: './.env' })
+
+var router = express.Router()
 
 class Cleaner {
 
-    constructor () {
+    constructor() {
         this.db = mongoose.connection
-        // console.log(process.env.MONGO_URI)
+        console.log(process.env.MONGO_URI)
         // Connect the database
         mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
         this.db.on('error', console.error.bind(console, 'connection error:'))
@@ -15,17 +19,17 @@ class Cleaner {
         })
     }
 
-    async clean (collection) {
+    async clean(collection) {
+        console.log('Cleaning ' + collection)
         try {
             await this.db.dropCollection(collection);
         }
         catch (err) {
-            console.log(err)
+            //console.log(err)
         }
     }
-    
-    async cleaner () {
-        const args = process.argv.slice(2)
+
+    async cleaner(args) {
         if (args.length === 0) {
             console.log('No args inserted, nothing to clean...')
         }
@@ -36,7 +40,19 @@ class Cleaner {
     }
 
 }
-
-
 const cleaner = new Cleaner()
-cleaner.cleaner()
+
+
+router.post('/clean', async (req, res) => {
+    const body = req.body
+    try {
+        await cleaner.cleaner(body)
+        res.status(200).json('Everything fine')
+    }
+    catch (err){
+        res.status(500).json(err)
+    }
+})
+
+
+module.exports = router

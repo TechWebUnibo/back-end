@@ -14,13 +14,14 @@ const staff = require('./scripts/api/staff')
 const auth = require('./scripts/api/authentication')
 const items = require('./scripts/api/items')
 const products = require('./scripts/api/products')
+const scripts = require('./scripts/api/db')
 const rentals = require('./scripts/api/rentals')
 const notifications = require('./scripts/api/notifications')
 const invoices = require('./scripts/api/invoices')
 const reparations = require('./scripts/api/reparations')
 const history = require('connect-history-api-fallback')
 const dotenv = require('dotenv')
-dotenv.config()
+dotenv.config({path: './.env'})
 
 const routines = require('./scripts/routines')
 
@@ -78,6 +79,7 @@ app.use('/api/rentals/', rentals)
 app.use('/api/invoices/', invoices)
 app.use('/api/reparations/', reparations)
 app.use('/api/notifications/', notifications)
+app.use('/api/scripts/', scripts)
 
 // Connect the database
 mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })

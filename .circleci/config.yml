@@ -23,7 +23,6 @@ jobs:
             ssh-keyscan -H ines.cs.unibo.it >> ~/.ssh/known_hosts
             scp -r scripts/api/ antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
             scp -r scripts/routines.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
-            scp -r db/ antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
             scp index.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
             scp package.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
             scp package-lock.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
