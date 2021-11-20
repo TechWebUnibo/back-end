@@ -5,7 +5,7 @@ require('dotenv').config({ path: './.env' })
 class Cleaner {
 
     constructor () {
-        this.db = mongoose.connection
+    this.db = mongoose.connection
         // console.log(process.env.MONGO_URI)
         // Connect the database
         mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
