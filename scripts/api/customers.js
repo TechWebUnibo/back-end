@@ -128,10 +128,10 @@ router.delete('/:id', auth.verifyToken, (req, res) => {
 router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
     const id = req.params.id
     let newData = req.body
-    newData.password = newData.password
-        ? bcrypt.hashSync(newData.password, 14)
-        : undefined
-    if (req.file) {
+    if (newData.password){
+        newData.password = bcrypt.hashSync(newData.password, 14)
+    }
+    if(req.file){
         newData.avatar = path.join(avatarPath, req.file.filename)
     }
     Customer.findOneAndUpdate(
@@ -142,7 +142,8 @@ router.post('/:id', auth.verifyToken, upload.single('avatar'), (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
-                deleteAvatar(result.avatar)
+                if(result.avatar && newData.avatar)
+                    deleteAvatar(result.avatar)
                 res.status(200).json({
                     message: 'Data modified',
                     customer: result,

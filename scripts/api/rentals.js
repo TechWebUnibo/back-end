@@ -92,14 +92,23 @@ router.get('/', auth.verifyToken, async (req, res) => {
     const productName = req.query.productName
     const customerName = req.query.customerName
     const employeeName = req.query.employeeName
+    const img = req.query.img
     delete query.productName
     delete query.customerName
     delete query.employeeName
+    delete query.img
     if (query.start) query.start = { $gte: query.start }
     if (query.end) query.end = { $lte: query.end }
 
     try {
         let rents = await Rent.find(query).lean().exec()
+        console.log(img)
+        if(img){
+            for(rent of rents){
+                const product = await Product.findById(rent.productType)
+                rent.img = product.img
+            }
+        }
         if (productName || customerName || employeeName) {
             for (let rent of rents) {
                 if (customerName) {
