@@ -16,16 +16,16 @@ jobs:
       - run:
           name: Deploy
           command: | 
-            ssh-keyscan -H ines.cs.unibo.it >> ~/.ssh/known_hosts
-            scp -r scripts/api/ antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
-            scp -r scripts/routines.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/scripts/
-            scp index.js antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
-            scp package.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
-            scp package-lock.json antonio.lopez2@ines.cs.unibo.it:/home/web/site202118/html/
+            ssh-keyscan -H lucia.cs.unibo.it >> ~/.ssh/known_hosts
+            scp -r scripts/api/ antonio.lopez2@lucia.cs.unibo.it:/home/web/site202118/html/scripts/
+            scp -r scripts/routlucia.js antonio.lopez2@lucia.cs.unibo.it:/home/web/site202118/html/scripts/
+            scp index.js antonio.lopez2@lucia.cs.unibo.it:/home/web/site202118/html/
+            scp package.json antonio.lopez2@lucia.cs.unibo.it:/home/web/site202118/html/
+            scp package-lock.json antonio.lopez2@lucia.cs.unibo.it:/home/web/site202118/html/
       - run:
           name: Install packages
           command: |
-            ssh antonio.lopez2@ines.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html && npm install --only=production' "
+            ssh antonio.lopez2@lucia.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html && npm install --only=production' "
 
 
 workflows:
