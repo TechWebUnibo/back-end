@@ -94,7 +94,7 @@ router.get(':/id/available', (req, res) => {
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Rent.exists({ items: id })
+    Rent.exists({ products: id })
         .then((found) => {
             if (!found)
                 Item.findOneAndDelete({ _id: id })
