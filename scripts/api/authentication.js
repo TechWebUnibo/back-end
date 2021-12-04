@@ -186,7 +186,7 @@ router.get('/staff/authenticated', (req, res) => {
     if (token != null) {
         jwt.verify(token, publicKey, { algorithm: 'RS256' }, (err, decoded) => {
             // TODO - separare i db di manager ed admin?
-            if (!err && decoded.role === 'manager')
+            if (!err && (decoded.role === 'manager' || decoded.role === 'administrator'))
                 return res.status(200).json({ message: 'Valid token' })
             else return res.status(401).json({ message: 'Invalid token' })
         })
