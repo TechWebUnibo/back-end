@@ -164,60 +164,65 @@ router.get('/:id/available', auth.verifyLogin, async (req, res) => {
     let end = req.query.end
     let rent = req.query.rent
 
-    if (!Date.parse(start) || !Date.parse(end) || start > end)
-        res.status(400).json({ message: 'Bad query', error: {} })
-    else {
-        // Check if the type of item exists
-        const category = await Product.findOne({ _id: id })
-        if (category) {
-            let products =
-                category.products.length === 0 ? [id] : category.products
-            let response = []
-            // Check if the user is logged
-            if (!req.user) {
-                for (const product of products) {
-                    let items = await Item.find({
-                        type: product,
-                        condition: { $ne: 'not_available' },
-                    })
-                    let chosen = support.getCheapest(items, start, end)
-                    if (typeof chosen != 'undefined') {
-                        response.push(chosen)
-                    }
-                }
-                // Provide only the price if the user is not logged
-                return res.status(200).json({
-                    products: response.map((item) => {
-                        return item['_id']
-                    }),
-                    price: support.computePrice(response, start, end),
-                })
-            } else {
-                for (const product of products) {
-                    let items = await support.getAvailable(
-                        product,
-                        start,
-                        end,
-                        rent
-                    )
-                    if (items.length > 0) {
+    try {
+        if (!Date.parse(start) || !Date.parse(end) || start > end)
+            res.status(400).json({ message: 'Bad query', error: {} })
+        else {
+            // Check if the type of item exists
+            const category = await Product.findOne({ _id: id })
+            if (category) {
+                let products =
+                    category.products.length === 0 ? [id] : category.products
+                let response = []
+                // Check if the user is logged
+                if (!req.user) {
+                    for (const product of products) {
+                        let items = await Item.find({
+                            type: product,
+                            condition: { $ne: 'not_available' },
+                        })
                         let chosen = support.getCheapest(items, start, end)
-                        response.push(chosen)
-                    } else {
-                        return res.status(200).json({ available: false })
+                        if (typeof chosen != 'undefined') {
+                            response.push(chosen)
+                        }
                     }
+                    // Provide only the price if the user is not logged
+                    return res.status(200).json({
+                        products: response.map((item) => {
+                            return item['_id']
+                        }),
+                        price: support.computePrice(response, start, end),
+                    })
+                } else {
+                    for (const product of products) {
+                        let items = await support.getAvailable(
+                            product,
+                            start,
+                            end,
+                            rent
+                        )
+                        if (items.length > 0) {
+                            let chosen = support.getCheapest(items, start, end)
+                            response.push(chosen)
+                        } else {
+                            return res.status(200).json({ available: false })
+                        }
+                    }
+                    res.status(200).json({
+                        available: true,
+                        products: response.map((item) => {
+                            return item['_id']
+                        }),
+                        price: support.computePrice(response, start, end),
+                    })
                 }
-                res.status(200).json({
-                    available: true,
-                    products: response.map((item) => {
-                        return item['_id']
-                    }),
-                    price: support.computePrice(response, start, end),
-                })
+            } else {
+                res.status(404).json({ message: 'Product not found', error: {} })
             }
-        } else {
-            res.status(404).json({ message: 'Product not found', error: {} })
         }
+    }
+    catch (err) {
+        res.status(500).json({ message: 'Server error', error: err })
     }
 })
 
