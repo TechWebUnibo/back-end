@@ -312,7 +312,8 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                 (!returnItems[item].start ||
                     !returnItems[item].end ||
                     Date.parse(returnItems[item].start) >
-                        Date.parse(returnItems[item].end))
+                        Date.parse(returnItems[item].end) ||
+                    Date.parse(returnItems[item].start) !== Date.parse((new Date()).setHours(0,0,0,0)))
             ) {
                 return res.status(400).json({
                     message:

@@ -133,11 +133,11 @@ router.post('/:id', auth.verifyToken, async (req, res) => {
         } else if (
             newData.condition &&
             newData.condition === 'broken' &&
-            (!newData.start || !newData.end || newData.start > newData.end)
+            (!newData.start || !newData.end || newData.start > newData.end || Date.parse(newData.start) !== Date.parse(start))
         ) {
             return res.status(400).json({
                 message:
-                    'For a broken object you shuld insert a valid period of unavailability',
+                    'For a broken object you should insert a valid period of unavailability',
                 error: {},
             })
         } else {
