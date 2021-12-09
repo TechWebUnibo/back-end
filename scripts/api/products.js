@@ -129,9 +129,7 @@ router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
     const id = req.params.id
     let newData = req.body
     if (req.file)
-        newData.img = req.file
-            ? path.join(productsPath, req.file.filename)
-            : undefined
+        newData.img = path.join(productsPath, req.file.filename)
     Product.findOneAndUpdate(
         { _id: id },
         { $set: newData },
