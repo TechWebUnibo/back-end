@@ -299,6 +299,7 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
         let returnItems = req.body.products
         // Check if the item inserted are the same of the rental
         for (const item of rent.products) {
+            console.log(item)
             if (!returnItems[item]) {
                 return res.status(400).json({
                     message:
