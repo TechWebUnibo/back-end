@@ -297,6 +297,8 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
     if (rent && (rent.state === 'in_progress' || rent.state === 'delayed')) {
         let products = []
         let returnItems = req.body.products
+        let start = new Date()
+        start.setHours(0,0,0,0)
         // Check if the item inserted are the same of the rental
         for (const item of rent.products) {
             console.log(item)
@@ -314,11 +316,11 @@ router.post('/:id/terminate', auth.verifyToken, async (req, res) => {
                     !returnItems[item].end ||
                     Date.parse(returnItems[item].start) >
                         Date.parse(returnItems[item].end) ||
-                    Date.parse(returnItems[item].start) !== Date.parse((new Date()).setHours(0,0,0,0)))
+                    Date.parse(returnItems[item].start) !== Date.parse(start))
             ) {
                 return res.status(400).json({
                     message:
-                        'Bad input parameter, if the item is broken a period of reparation must be also indicated',
+                        'Bad input parameter, if the item is broken a valid period of reparation must be also indicated',
                     error: {},
                 })
             }

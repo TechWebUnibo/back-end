@@ -99,7 +99,7 @@ async function checkItems(items, start, end, rent) {
 async function checkAvailability(item, start, end, rent) {
     let query = {
         products: item,
-        $or: [
+        $and: [
             { state: { $ne: 'cancelled' } },
             { state: { $ne: 'terminated' } },
         ],
@@ -121,6 +121,7 @@ async function checkAvailability(item, start, end, rent) {
         ],
     })
     console.log({occupied, tmp})
+    console.log(await Rent.find(query))
     return occupied || tmp
 }
 
