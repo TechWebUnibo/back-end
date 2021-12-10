@@ -138,7 +138,8 @@ router.post('/:id', auth.verifyToken, upload.single('img'), (req, res) => {
         .exec()
         .then((result) => {
             if (result) {
-                deleteImg(result.img)
+                if (result.img && newData.img)
+                    deleteImg(result.img)
                 res.status(200).json({
                     message: 'Data modified',
                     product: result,
