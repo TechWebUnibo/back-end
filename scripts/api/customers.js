@@ -8,6 +8,7 @@ const express = require('express')
 const mongoose = require('mongoose')
 const fs = require('fs')
 const Customer = require('./models/customer')
+const Rent = require('./models/rent')
 const multer = require('multer')
 const path = require('path')
 const bcrypt = require('bcryptjs')
@@ -107,20 +108,32 @@ function deleteAvatar(avatar) {
  */
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
-    Customer.findOneAndDelete({ _id: id })
-        .exec()
-        .then((result) => {
-            deleteAvatar(result.avatar)
-            res.status(200).json({
-                message: 'Customer deleted',
-                customer: result,
-            })
-        })
-        .catch((err) => {
-            res.status(404).json({
-                message: 'Customer not found',
-                error: err,
-            })
+    Rent.exists({ customer: id})
+        .then((found) => {
+            if(!found){
+                Customer.findOneAndDelete({ _id: id })
+                    .exec()
+                    .then((result) => {
+                        deleteAvatar(result.avatar)
+                        res.status(200).json({
+                            message: 'Customer deleted',
+                            customer: result,
+                        })
+                    })
+                    .catch((err) => {
+                        res.status(404).json({
+                            message: 'Customer not found',
+                            error: err,
+                        })
+                    })
+            }
+            else{
+                res.status(406).json({
+                    message:
+                        'The user cannot be deleted, he already have rents ',
+                    error: {},
+                })
+            }
         })
 })
 
