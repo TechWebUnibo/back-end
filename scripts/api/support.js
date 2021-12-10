@@ -113,16 +113,14 @@ async function checkAvailability(item, start, end, rent) {
     let occupied = await Rent.exists(query)
     let tmp = await Rep.exists({
         products: item,
-        $or: [
-            { state: { $ne: 'cancelled' } },
-            { state: { $ne: 'terminated' } },
-        ],
+        terminated: false,
         $or: [
             { start: { $gte: start, $lte: end } },
             { end: { $gte: start, $lte: end } },
             { start: { $lte: start }, end: { $gte: end } },
         ],
     })
+    console.log({occupied, tmp})
     return occupied || tmp
 }
 
