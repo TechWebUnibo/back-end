@@ -71,8 +71,6 @@ router.post('/', auth.verifyToken, upload.single('img'), (req, res) => {
         })
 })
 
-// TODO - only the type of the product
-// TODO - make a function that check if a product is available
 
 /**
  * Get all the products.
@@ -84,6 +82,27 @@ router.get('/', (req, res) => {
         .exec()
         .then((doc) => {
             res.status(200).json(doc)
+        })
+        .catch((err) => {
+            res.status(500).json({ message: 'Internal error', error: err })
+        })
+})
+
+/**
+ * Get the product with the given id.
+ * @param {res} res Response object
+ */
+router.get('/:id', (req, res) => {
+    const id = req.params.id
+    Product.findOne({_id: id})
+        .exec()
+        .then((doc) => {
+            if(doc) {
+                res.status(200).json(doc)
+            }
+            else{
+                res.status(404).json({ message: 'Product not found', error: {}})
+            }
         })
         .catch((err) => {
             res.status(500).json({ message: 'Internal error', error: err })
