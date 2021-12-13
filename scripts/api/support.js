@@ -258,7 +258,7 @@ async function replaceItemPeriod(item, start, end) {
     if (end) {
         query = {
             products: item,
-            $or: [
+            $and: [
                 { state: { $ne: 'cancelled' } },
                 { state: { $ne: 'terminated' } },
             ],
@@ -271,7 +271,7 @@ async function replaceItemPeriod(item, start, end) {
     } else {
         query = {
             products: item,
-            $or: [
+            $and: [
                 { state: { $ne: 'cancelled' } },
                 { state: { $ne: 'terminated' } },
             ],
@@ -298,7 +298,7 @@ async function replaceUpdateItemPeriod(item, condition, start, end) {
     if (end) {
         query = {
             products: item,
-            $or: [
+            $and: [
                 { state: { $ne: 'cancelled' } },
                 { state: { $ne: 'terminated' } },
             ],
@@ -311,7 +311,7 @@ async function replaceUpdateItemPeriod(item, condition, start, end) {
     } else {
         query = {
             products: item,
-            $or: [
+            $and: [
                 { state: { $ne: 'cancelled' } },
                 { state: { $ne: 'terminated' } },
             ],
