@@ -29,7 +29,7 @@ jobs:
       - run:
           name: Update src
           command: |
-            ssh antonio.lopez2@lucia.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html/src/back-end && npm install git pull' "
+            ssh antonio.lopez2@lucia.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html/src/back-end && git pull' "
 
 
 workflows:
