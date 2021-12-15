@@ -221,7 +221,7 @@ function computePrice(items, start, end) {
         }
         if (halfDaysDiscount) {
             price =
-                price * (days - workDaysCount) * halfDays +
+                price * (workDaysCount) * halfDays +
                 price * (days - workDaysCount)
         } else {
             price = price * days

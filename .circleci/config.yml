@@ -26,6 +26,10 @@ jobs:
           name: Install packages
           command: |
             ssh antonio.lopez2@lucia.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html && npm install --only=production' "
+      - run:
+          name: Update src
+          command: |
+            ssh antonio.lopez2@lucia.cs.unibo.it "bash --login -c 'cd /home/web/site202118/html/src/management-dashboard && npm install git pull' "
 
 
 workflows:
