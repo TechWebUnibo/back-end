@@ -48,5 +48,19 @@ router.post('/customers/check/:id', async (req, res) => {
         res.status(500).json(err)
     }
 })
+router.delete('/customers/:id', async (req, res) => {
+    const id = req.params.id
+    try {
+        const exist = await Notification.exists({ _id: id })
+        if (!exist) {
+            res.status(404).json({ message: 'Notification not found' })
+        }
+        const results = await Notification.deleteOne({_id: id})
+        res.status(200).json(results)
+    } catch {
+        console.log(err)
+        res.status(500).json(err)
+    }
+})
 
 module.exports = router
