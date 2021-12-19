@@ -48,6 +48,25 @@ router.get('/', (req, res) => {
         })
 })
 
+/**
+ * Return the staff member with the given id.
+ * @param {res} res Response object
+ */
+router.get('/:id', async (req, res) => {
+    const id = req.params.id
+    try {
+        const employee = await Employee.findById(id)
+        if (employee) {
+            res.status(200).json(employee)
+        } else {
+            res.status(404).json({ message: 'Employee not found' })
+        }
+    } catch (err) {
+        return res.status(500).json({ message: 'Internal error', error: err })
+    }
+})
+
+
 router.delete('/:id', auth.verifyToken, (req, res) => {
     const id = req.params.id
     Employee.findOneAndDelete({ _id: id })
